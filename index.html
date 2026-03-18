@@ -1306,10 +1306,12 @@ async function switchCity(name, lng, lat, countryCode) {
     }
     renderMap();
     hideLoading();
+    updateURL(name);
   } else {
     // 无缓存：先用估算数据渲染，再 OSRM 精确化
     renderMap();
     hideLoading();
+    updateURL(name);
 
     // 9. OSRM 批量计算真实驾车时间（逐批更新渲染）
     const destinations = [];
