@@ -1170,12 +1170,20 @@ async function switchCity(name, lng, lat, countryCode) {
 
     // 根据国家选择合适的行政级别
     const isJapan = countryCode === 'jp';
+    // 欧洲国家列表（level 8 = 市/区/镇，统一处理）
+    const EUROPE_CODES = new Set(['gb','fr','de','it','es','pt','nl','be','at','ch','pl','cz','se','no','dk','fi','ie','hu','ro','bg','hr','sk','si','lt','lv','ee','lu','gr']);
+    const isEurope = EUROPE_CODES.has(countryCode);
+
     const queries = isJapan ? [
       // 日本：level 4 = 都道府県, level 7 = 市区町村
       { radius: 400000, levels: "4", labelKey: "loadingAdmin" },
       { radius: 400000, levels: "7", labelKey: "loadingDetail" }
+    ] : isEurope ? [
+      // 欧洲：level 6 = 省/郡, level 8 = 市镇/Borough
+      { radius: 400000, levels: "6", labelKey: "loadingAdmin" },
+      { radius: 400000, levels: "8", labelKey: "loadingDetail" }
     ] : [
-      // 其他国家：level 5-6 = 省/县, level 7-8 = 市/镇
+      // 其他国家
       { radius: 400000, levels: "5|6", labelKey: "loadingAdmin" },
       { radius: 400000, levels: "4", labelKey: "loadingAdmin", fallback: true },
       { radius: 300000, levels: "7", labelKey: "loadingDetail" },
