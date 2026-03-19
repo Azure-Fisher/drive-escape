@@ -89,26 +89,102 @@
     .search-box input:focus { box-shadow: 0 4px 20px rgba(0,0,0,0.18); }
 
     /* 语言切换器 */
-    .lang-switcher select {
+    .lang-switcher select,
+
+    .transport-switcher select {
+
       padding: 8px 10px;
+
       border: none;
+
       border-radius: 10px;
+
       background: rgba(255,255,255,0.92);
+
       backdrop-filter: blur(8px);
+
       -webkit-backdrop-filter: blur(8px);
+
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
       font-size: 12px;
+
       outline: none;
+
       font-family: system-ui, -apple-system, sans-serif;
+
       cursor: pointer;
+
       color: #333;
+
       -webkit-appearance: none;
+
       appearance: none;
+
       padding-right: 22px;
+
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+
       background-repeat: no-repeat;
+
       background-position: right 8px center;
+
     }
+
+    /* 往返筛选 */
+
+    .roundtrip-filter {
+
+      background: rgba(255,255,255,0.92);
+
+      backdrop-filter: blur(8px);
+
+      -webkit-backdrop-filter: blur(8px);
+
+      border-radius: 10px;
+
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
+      padding: 6px 12px;
+
+      font-size: 12px;
+
+      color: #333;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      cursor: pointer;
+
+    }
+
+    .roundtrip-filter input[type="checkbox"] {
+
+      width: 14px;
+
+      height: 14px;
+
+      accent-color: #1a6e5c;
+
+      cursor: pointer;
+
+    }
+
+    .roundtrip-filter label {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 6px;
+
+      cursor: pointer;
+
+    }
+
     #search-results {
       margin-top: 4px;
       background: rgba(255,255,255,0.95);
@@ -296,9 +372,49 @@
         z-index: 1002;
       }
       .lang-switcher select {
+
         padding: 6px 24px 6px 8px;
+
         font-size: 11px;
+
       }
+
+      .top-controls .transport-switcher {
+
+        position: fixed;
+
+        top: 68px;
+
+        left: 10px;
+
+        z-index: 1001;
+
+      }
+
+      .transport-switcher select {
+
+        padding: 6px 24px 6px 8px;
+
+        font-size: 11px;
+
+      }
+
+      .top-controls .roundtrip-filter {
+
+        position: fixed;
+
+        top: 68px;
+
+        right: 10px;
+
+        z-index: 1001;
+
+        padding: 5px 8px;
+
+        font-size: 10px;
+
+      }
+
       #search-results { max-height: 200px; }
 
       .legend {
@@ -490,18 +606,57 @@
 </div>
 
 <div class="top-controls">
+
   <div class="search-box">
+
     <input type="text" id="city-search" placeholder="搜索出发城市..." />
+
     <div id="search-results"></div>
+
   </div>
-  <div class="lang-switcher">
-    <select id="lang-select">
-      <option value="zh-CN">简体中文</option>
-      <option value="zh-TW">繁體中文</option>
-      <option value="en">English</option>
-      <option value="ja">日本語</option>
+
+  <div class="transport-switcher">
+
+    <select id="transport-select">
+
+      <option value="car">🚗 自驾</option>
+
+      <option value="train">🚄 高铁</option>
+
+      <option value="bike">🚴 骑行</option>
+
     </select>
+
   </div>
+
+  <div class="roundtrip-filter">
+
+    <label>
+
+      <input type="checkbox" id="roundtrip-filter" />
+
+      <span>仅往返≤8h</span>
+
+    </label>
+
+  </div>
+
+  <div class="lang-switcher">
+
+    <select id="lang-select">
+
+      <option value="zh-CN">简体中文</option>
+
+      <option value="zh-TW">繁體中文</option>
+
+      <option value="en">English</option>
+
+      <option value="ja">日本語</option>
+
+    </select>
+
+  </div>
+
 </div>
 
 <div class="loading-overlay" id="loading">
@@ -662,7 +817,64 @@ const colorBands = [
 ];
 
 const MAX_DRIVE_HOURS = 5.0; // 超过此时间的区县不显示
+
 const MAX_STRAIGHT_KM = 400; // 直线距离上限，防止飞地
+
+
+
+// ── 交通方式参数 ──
+
+const TRANSPORT_CONFIGS = {
+
+  car: {
+
+    name: '自驾',
+
+    speed: 85,           // km/h 平均车速
+
+    roadFactor: 1.35,    // 路网弯曲系数
+
+    fixedTime: 0,        // 固定耗时（小时）
+
+    maxRange: 5.0        // 最大展示时间
+
+  },
+
+  train: {
+
+    name: '高铁',
+
+    speed: 250,          // km/h 高铁平均时速（含停靠）
+
+    roadFactor: 1.1,     // 铁路弯曲系数较小
+
+    fixedTime: 1.0,      // 进出站+候车时间（小时）
+
+    maxRange: 5.0
+
+  },
+
+  bike: {
+
+    name: '骑行',
+
+    speed: 15,           // km/h 自行车平均速度
+
+    roadFactor: 1.5,     // 骑行路线弯曲系数
+
+    fixedTime: 0,
+
+    maxRange: 5.0
+
+  }
+
+};
+
+
+
+let currentTransport = localStorage.getItem('transport') || 'car';
+
+let roundtripFilterEnabled = localStorage.getItem('roundtripFilter') === 'true';
 
 // ── 34 个省级行政区 ──
 // 城市核心区坐标校准（Nominatim 对大面积行政区返回几何中心，不是主城区）
@@ -778,11 +990,20 @@ function haversine(lng1, lat1, lng2, lat2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function estimateDriveTime(lng, lat) {
+function estimateDriveTime(lng, lat, transport = currentTransport) {
+
+  const config = TRANSPORT_CONFIGS[transport];
+
   const dist = haversine(currentOrigin[0], currentOrigin[1], lng, lat);
-  const roadDist = Math.round(dist * 1.35);
-  const time = Math.round(roadDist / 85 * 10) / 10;
-  return { time, dist: roadDist };
+
+  const roadDist = Math.round(dist * config.roadFactor);
+
+  const travelTime = roadDist / config.speed;
+
+  const time = Math.round((travelTime + config.fixedTime) * 10) / 10;
+
+  return { time, dist: roadDist, transport };
+
 }
 
 function getDriveData(feature) {
@@ -834,14 +1055,36 @@ const infoPanel = document.getElementById("info");
 const infoName = document.getElementById("info-name");
 const infoDetail = document.getElementById("info-detail");
 
+// 交通方式图标
+
+function getTransportIcon(transport = currentTransport) {
+
+  const icons = { car: '🚗', train: '🚄', bike: '🚴' };
+
+  return icons[transport] || '🚗';
+
+}
+
+
+
 function showInfo(dd) {
+
   if (!dd) { infoPanel.style.display = "none"; return; }
+
   const isOrigin = dd.isOrigin || dd.time === 0;
-  infoName.textContent = isOrigin ? `🚗 ${dd.name}（${t('origin')}）` : dd.name;
+
+  const icon = getTransportIcon(dd.transport || currentTransport);
+
+  infoName.textContent = isOrigin ? `${icon} ${dd.name}（${t('origin')}）` : dd.name;
+
   infoDetail.innerHTML = isOrigin
+
     ? `<span class="time">${t('originLabel')}</span>`
+
     : `<span class="time">🕐 ${fmtTime(dd.time)} ${t('timeUnit')}</span> · ${dd.dist} km${dd.estimated ? ' ' + t('estimated') : ''}`;
+
   infoPanel.style.display = "block";
+
 }
 
 // ── 标签 ──
@@ -851,9 +1094,32 @@ function updateLabels() {
   const bounds = map.getBounds();
   const placed = [];
 
+  const maxTime = TRANSPORT_CONFIGS[currentTransport].maxRange;
+
   const allFeatures = [
-    ...allCountyFeatures.filter(f => { const d = getDriveData(f); if(!d) return false; if(String(f?.properties?.adcode)===originAdcode) return true; if(d.time>MAX_DRIVE_HOURS) return false; const c=f?.properties?.centroid||f?.properties?.center; if(c){const sd=haversine(currentOrigin[0],currentOrigin[1],c[0],c[1]); if(sd>MAX_STRAIGHT_KM) return false;} return true; }).map(f => ({ f, core: true })),
+
+    ...allCountyFeatures.filter(f => {
+
+      const d = getDriveData(f);
+
+      if(!d) return false;
+
+      if(String(f?.properties?.adcode)===originAdcode) return true;
+
+      if(d.time > maxTime) return false;
+
+      if(roundtripFilterEnabled && d.time > 4.0) return false;
+
+      const c=f?.properties?.centroid||f?.properties?.center;
+
+      if(c){const sd=haversine(currentOrigin[0],currentOrigin[1],c[0],c[1]); if(sd>MAX_STRAIGHT_KM) return false;}
+
+      return true;
+
+    }).map(f => ({ f, core: true })),
+
     ...allGrayFeatures.map(f => ({ f, core: false }))
+
   ];
 
   allFeatures.sort((a, b) => {
@@ -978,26 +1244,53 @@ document.addEventListener("click", e => {
 });
 
 // ── 数据加载 ──
+
 // DataV 代理：线上走 /api/geo 代理（避免 CORS/403），本地直连
+
 function geoURL(code) {
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+
+  // 本地开发或 file:// 协议：直接用 DataV API
+
+  if (!location.hostname || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
+
     return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
+
   }
+
   return `/api/geo?code=${code}`;
+
 }
 
-async function fetchJSON(url, timeoutMs = 8000) {
+async function fetchJSON(url, timeoutMs = 15000) {
+
   const controller = new AbortController();
+
   const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
-    const r = await fetch(url, { signal: controller.signal });
-    clearTimeout(timer);
-    if (!r.ok) throw new Error(url);
-    return r.json();
-  } catch(e) {
-    clearTimeout(timer);
-    throw e;
-  }
+
+    const r = await fetch(url, {
+
+      signal: controller.signal,
+
+      mode: 'cors',
+      headers: { 'Accept': 'application/json' }
+    });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timer);
+    // 检测 CORS 或网络错误
+    if (e.name === 'TypeError' && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('network'))) {
+      if (location.protocol === 'file:') {
+        throw new Error('请使用本地服务器运行（如 VS Code Live Server 插件），或部署到线上');
+      }
+      throw new Error('网络请求被阻止，请检查网络或尝试刷新页面');
+    }
+    console.warn('fetchJSON failed:', url, e.message);
+    throw e;
+  }
 }
 
 // 并发控制：最多同时 N 个请求
@@ -1169,18 +1462,39 @@ function renderMap(skipFitBounds = false) {
   }
 
   // 过滤掉超过 MAX_DRIVE_HOURS 或直线距离过远的区县（避免飞地）
+
+  // 同时支持往返8小时筛选
+
+  const maxTime = TRANSPORT_CONFIGS[currentTransport].maxRange;
+
   const visibleFeatures = allCountyFeatures.filter(f => {
+
     const d = getDriveData(f);
+
     if (!d) return false;
+
     if (String(f?.properties?.adcode) === originAdcode) return true;
-    if (d.time > MAX_DRIVE_HOURS) return false;
+
+    if (d.time > maxTime) return false;
+
+    // 往返8小时筛选：单程≤4小时
+
+    if (roundtripFilterEnabled && d.time > 4.0) return false;
+
     // 直线距离检查：防止远处孤立区县通过高速连通导致飞地
+
     const center = f?.properties?.centroid || f?.properties?.center;
+
     if (center) {
+
       const straightDist = haversine(currentOrigin[0], currentOrigin[1], center[0], center[1]);
+
       if (straightDist > MAX_STRAIGHT_KM) return false;
+
     }
+
     return true;
+
   });
 
   // 县区填充层
@@ -1320,16 +1634,52 @@ async function getCityCenter(name, lng, lat) {
 }
 
 async function switchCity(name, lng, lat, countryCode) {
+
   // 0. 校准城市中心坐标（Nominatim 对大面积城市返回几何中心，不是主城区）
+
   const corrected = CITY_CENTERS[name] || CITY_CENTERS[name.replace(/市$/, '').replace(/白族自治州$/, '').replace(/自治州$/, '')];
+
   if (corrected) {
+
     lng = corrected[0]; lat = corrected[1];
+
   } else {
+
     const osm = await getCityCenter(name.replace(/市$/, ''), lng, lat);
+
     if (osm) { lng = osm[0]; lat = osm[1]; }
+
   }
 
-  // 1. 清除旧图层
+
+
+  // 全局超时保护：30秒后自动隐藏 loading
+
+  const globalTimeout = setTimeout(() => {
+
+    console.warn('switchCity timeout, forcing render');
+
+    if (allCountyFeatures.length === 0) {
+
+      hideLoading();
+
+      alert('数据加载超时，请检查网络连接或刷新页面重试');
+
+    } else {
+
+      renderMap();
+
+      hideLoading();
+
+    }
+
+  }, 30000);
+
+
+
+  try {
+
+    // 1. 清除旧图层
   for (const layer of activeLayers) {
     map.removeLayer(layer);
   }
@@ -1549,21 +1899,41 @@ async function switchCity(name, lng, lat, countryCode) {
   try { cached = JSON.parse(localStorage.getItem(cacheKey)); } catch(e) {}
 
   if (cached && typeof cached === 'object' && Object.keys(cached).length > 0) {
+
     // 有缓存：直接用缓存的 OSRM 数据
+
     for (const [code, data] of Object.entries(cached)) {
+
       if (driveDataMap[code]) {
+
         driveDataMap[code] = { ...driveDataMap[code], ...data, estimated: false };
+
       }
+
     }
+
+    clearTimeout(globalTimeout);
+
     renderMap();
+
     hideLoading();
+
     updateURL(name);
+
     requestAnimationFrame(syncSearchWidth);
+
   } else {
+
     // 无缓存：先用估算数据渲染，再 OSRM 精确化
+
+    clearTimeout(globalTimeout);
+
     renderMap();
+
     hideLoading();
+
     updateURL(name);
+
     requestAnimationFrame(syncSearchWidth);
 
     // 9. OSRM 批量计算真实驾车时间（逐批更新渲染）
@@ -1621,12 +1991,40 @@ async function switchCity(name, lng, lat, countryCode) {
     }
     hideLoading();
 
+
+
     // 保存到 localStorage
+
     try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
+
   }
 
+
+
   // 更新 URL
+
   updateURL(name);
+
+  } catch(e) {
+
+    clearTimeout(globalTimeout);
+
+    console.error('switchCity error:', e);
+
+    hideLoading();
+
+    if (allCountyFeatures.length > 0) {
+
+      renderMap();
+
+    } else {
+
+      alert('数据加载失败: ' + e.message + '\n请检查网络连接后重试');
+
+    }
+
+  }
+
 }
 
 // ── URL 参数：支持 ?city=xxx ──
@@ -1713,8 +2111,110 @@ async function welcomeSelectCity(name) {
   });
 })();
 
+// ── 交通方式和筛选控制 ──
+
+function initTransportControls() {
+
+  const transportSelect = document.getElementById('transport-select');
+
+  const roundtripCheckbox = document.getElementById('roundtrip-filter');
+
+
+
+  // 恢复保存的状态
+
+  if (transportSelect) {
+
+    transportSelect.value = currentTransport;
+
+    transportSelect.addEventListener('change', () => {
+
+      currentTransport = transportSelect.value;
+
+      localStorage.setItem('transport', currentTransport);
+
+      // 重新计算所有区县的时间
+
+      recalculateAllTimes();
+
+      renderMap(true);
+
+    });
+
+  }
+
+
+
+  if (roundtripCheckbox) {
+
+    roundtripCheckbox.checked = roundtripFilterEnabled;
+
+    roundtripCheckbox.addEventListener('change', () => {
+
+      roundtripFilterEnabled = roundtripCheckbox.checked;
+
+      localStorage.setItem('roundtripFilter', roundtripFilterEnabled);
+
+      renderMap(true);
+
+    });
+
+  }
+
+}
+
+
+
+// 重新计算所有区县的时间
+
+function recalculateAllTimes() {
+
+  for (const code in driveDataMap) {
+
+    const data = driveDataMap[code];
+
+    if (data.estimated) {
+
+      // 找到对应的 feature 获取坐标
+
+      const feature = allCountyFeatures.find(f => String(f?.properties?.adcode) === code);
+
+      if (feature) {
+
+        const center = feature?.properties?.centroid || feature?.properties?.center;
+
+        if (center) {
+
+          const est = estimateDriveTime(center[0], center[1], currentTransport);
+
+          data.time = est.time;
+
+          data.dist = est.dist;
+
+          data.transport = currentTransport;
+
+        }
+
+      }
+
+    }
+
+  }
+
+}
+
+
+
 // ── 首次加载 ──
+
 (async function init() {
+
+  // 初始化交通方式控件
+
+  initTransportControls();
+
+
+
   // 检查 URL 参数是否指定了城市
   const urlCity = new URLSearchParams(window.location.search).get('city');
 
