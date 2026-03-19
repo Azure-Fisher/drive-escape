@@ -38,7 +38,7 @@
       border-radius: 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
       pointer-events: none;
-      white-space: nowrap;
+      max-width: calc(100vw - 320px);
     }
     .title-overlay .en {
       font-size: 10px;
@@ -262,7 +262,9 @@
       .title-overlay {
         top: 8px;
         padding: 6px 16px;
-        width: 180px;
+        max-width: calc(100vw - 140px);
+        white-space: normal;
+        width: auto;
       }
       .title-overlay .en { font-size: 7px; }
       .title-overlay h1 { font-size: 15px; }
@@ -711,9 +713,25 @@ colorBands.forEach(b => {
 });
 
 // ── 地图初始化 ──
+// 根据语言设置初始地图中心
+const LANG_MAP_CENTERS = {
+  'zh-CN': { center: [30.26, 120.15], zoom: 7 },
+  'zh-TW': { center: [25.04, 121.56], zoom: 8 },
+  'ja':    { center: [35.69, 139.69], zoom: 7 },
+  'en':    { center: [51.51, -0.12],  zoom: 6 }
+};
+const _initLang = localStorage.getItem('lang') || (function() {
+  const bl = (navigator.language || '').toLowerCase();
+  if (bl.startsWith('ja')) return 'ja';
+  if (bl.startsWith('zh-tw') || bl.startsWith('zh-hk')) return 'zh-TW';
+  if (bl.startsWith('zh')) return 'zh-CN';
+  return 'en';
+})();
+const _initMapView = LANG_MAP_CENTERS[_initLang] || LANG_MAP_CENTERS['en'];
+
 const map = L.map("map", {
-  center: [30.26, 120.15],
-  zoom: 8,
+  center: _initMapView.center,
+  zoom: _initMapView.zoom,
   zoomControl: false,
   attributionControl: true
 });
@@ -1474,9 +1492,10 @@ async function switchCity(name, lng, lat, countryCode) {
             const rName = el.tags?.["name:zh"] || el.tags?.["name:en"] || el.tags?.name || "";
             const est = estimateDriveTime(centroid[0], centroid[1]);
 
+            const adminLevel = parseInt(el.tags?.admin_level || "0");
             allCountyFeatures.push({
               type: "Feature",
-              properties: { name: rName, adcode: rCode, centroid, center: centroid },
+              properties: { name: rName, adcode: rCode, centroid, center: centroid, _adminLevel: adminLevel },
               geometry: geom
             });
             driveDataMap[rCode] = { name: rName, time: est.time, dist: est.dist, estimated: true };
@@ -1486,6 +1505,22 @@ async function switchCity(name, lng, lat, countryCode) {
       } catch (e) {
         console.error("Overpass API error:", e);
       }
+    }
+  }
+
+  // 日本の場合: level 7/8 が十分あれば level 4（都道府県）を除外（大きなポリゴンが市区町村を隠すため）
+  if (isJapan && allCountyFeatures.length > 0) {
+    const level4Ids = new Set();
+    const level7Plus = [];
+    // Overpass relation id は純粋な数値、level 4 は通常 relation area が広い
+    // タグ admin_level を保存しておく必要がある → featureの properties に adminLevel を追加済みかチェック
+    const fineCount = allCountyFeatures.filter(f => f.properties._adminLevel && f.properties._adminLevel >= 7).length;
+    if (fineCount > 5) {
+      // level 7+ が十分あれば level 4 を除外
+      allCountyFeatures = allCountyFeatures.filter(f => !f.properties._adminLevel || f.properties._adminLevel >= 7);
+      Object.keys(driveDataMap).forEach(k => {
+        if (!allCountyFeatures.find(f => String(f.properties.adcode) === k)) delete driveDataMap[k];
+      });
     }
   }
 
