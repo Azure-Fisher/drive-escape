@@ -1244,53 +1244,65 @@ document.addEventListener("click", e => {
 });
 
 // ── 数据加载 ──
-
-// DataV 代理：线上走 /api/geo 代理（避免 CORS/403），本地直连
+// CORS 代理列表（用于 file:// 协议跨域请求）
+const CORS_PROXIES = [
+  'https://corsproxy.io/?',
+  'https://api.allorigins.win/raw?url='
+];
+let currentProxyIndex = 0;
 
 function geoURL(code) {
-
-  // 本地开发或 file:// 协议：直接用 DataV API
-
-  if (!location.hostname || location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:') {
-
-    return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
-
-  }
-
-  return `/api/geo?code=${code}`;
-
+  return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
 }
 
 async function fetchJSON(url, timeoutMs = 15000) {
-
   const controller = new AbortController();
-
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
+  // 尝试直接请求
   try {
-
     const r = await fetch(url, {
-
       signal: controller.signal,
+      mode: 'cors',
+      headers: { 'Accept': 'application/json' }
+    });
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timer);
+    // CORS 错误：尝试代理
+    if (e.name === 'TypeError' && e.message.includes('fetch')) {
+      console.warn('Direct fetch failed, trying CORS proxy...');
+      return fetchWithProxy(url, timeoutMs);
+    }
+    throw e;
+  }
+}
 
-      mode: 'cors',
-      headers: { 'Accept': 'application/json' }
-    });
-    clearTimeout(timer);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  } catch(e) {
-    clearTimeout(timer);
-    // 检测 CORS 或网络错误
-    if (e.name === 'TypeError' && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError') || e.message.includes('network'))) {
-      if (location.protocol === 'file:') {
-        throw new Error('请使用本地服务器运行（如 VS Code Live Server 插件），或部署到线上');
-      }
-      throw new Error('网络请求被阻止，请检查网络或尝试刷新页面');
-    }
-    console.warn('fetchJSON failed:', url, e.message);
-    throw e;
-  }
+async function fetchWithProxy(url, timeoutMs = 15000) {
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    const proxyIndex = (currentProxyIndex + i) % CORS_PROXIES.length;
+    const proxy = CORS_PROXIES[proxyIndex];
+    const proxyUrl = proxy + encodeURIComponent(url);
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      console.log(`Trying proxy ${proxyIndex + 1}/${CORS_PROXIES.length}`);
+      const r = await fetch(proxyUrl, { signal: controller.signal });
+      clearTimeout(timer);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json();
+      currentProxyIndex = proxyIndex;
+      return data;
+    } catch(e) {
+      clearTimeout(timer);
+      console.warn(`Proxy ${proxyIndex + 1} failed:`, e.message);
+    }
+  }
+  throw new Error('网络请求失败。如使用本地文件，请安装浏览器扩展 Allow CORS 或使用 Live Server');
 }
 
 // 并发控制：最多同时 N 个请求
