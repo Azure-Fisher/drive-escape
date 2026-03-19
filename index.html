@@ -37,8 +37,12 @@
       padding: 10px 24px;
       border-radius: 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      pointer-events: none;
+      cursor: pointer;
       white-space: nowrap;
+      transition: box-shadow 0.15s;
+    }
+    .title-overlay:hover {
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
     }
     .title-overlay .en {
       font-size: 10px;
@@ -481,7 +485,7 @@
 
 <div id="map"></div>
 
-<div class="title-overlay">
+<div class="title-overlay" id="title-overlay-card">
   <div class="title-text">
     <div class="en">Weekend Self-Driving Escape Plan</div>
     <h1>周末自驾逃离计划</h1>
@@ -793,6 +797,7 @@ const loadingEl = document.getElementById("loading");
 const loadingText = document.getElementById("loading-text");
 
 function showLoading(msg) {
+  if (welcomeVisible) return; // 欢迎屏显示时不显示 loading
   loadingText.textContent = msg;
   loadingEl.classList.add("active");
 }
@@ -1287,6 +1292,11 @@ async function getCityCenter(name, lng, lat) {
 }
 
 async function switchCity(name, lng, lat, countryCode) {
+  // 新的 AbortController，取消旧请求
+  if (currentCityAbortController) currentCityAbortController.abort();
+  currentCityAbortController = new AbortController();
+  const signal = currentCityAbortController.signal;
+
   // 0. 校准城市中心坐标（Nominatim 对大面积城市返回几何中心，不是主城区）
   const corrected = CITY_CENTERS[name] || CITY_CENTERS[name.replace(/市$/, '').replace(/白族自治州$/, '').replace(/自治州$/, '')];
   if (corrected) {
@@ -1544,7 +1554,8 @@ async function switchCity(name, lng, lat, countryCode) {
       const destIndices = batch.map((_, j) => j + 1).join(";");
       const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&destinations=${destIndices}&annotations=duration,distance`;
       try {
-        const res = await fetch(url);
+        if (signal.aborted) break; // 欢迎屏打开，停止
+        const res = await fetch(url, { signal });
         const data = await res.json();
         if (data.code === "Ok") {
           const durations = data.durations[0];
@@ -1567,11 +1578,14 @@ async function switchCity(name, lng, lat, countryCode) {
             }
           });
         }
-      } catch(e) {}
+      } catch(e) {
+        if (e.name === 'AbortError') break; // 用户回到欢迎屏，停止
+      }
+      if (signal.aborted) break;
       showLoading(t('loadingDriveTime', { done: String(bi + 1), total: String(batches.length) }));
       renderMap(true);
     }
-    hideLoading();
+    if (!signal.aborted) hideLoading();
 
     // 保存到 localStorage
     try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
@@ -1592,12 +1606,42 @@ function updateURL(name) {
 const _origSwitchCity = switchCity;
 
 // ── 欢迎屏逻辑 ──
+let welcomeVisible = false;
+let currentCityAbortController = null; // 取消当前城市的后台请求
+
+function showWelcome() {
+  const ws = document.getElementById('welcome-screen');
+  if (!ws) return;
+  welcomeVisible = true;
+  ws.classList.remove('hidden');
+  requestAnimationFrame(() => ws.classList.remove('fade-out'));
+  // 清空搜索框
+  const wi = document.getElementById('welcome-input');
+  const wr = document.getElementById('welcome-results');
+  if (wi) wi.value = '';
+  if (wr) wr.style.display = 'none';
+  // 隐藏 loading
+  hideLoading();
+  // 取消后台 OSRM/Overpass 请求
+  if (currentCityAbortController) {
+    currentCityAbortController.abort();
+    currentCityAbortController = null;
+  }
+}
+
 function dismissWelcome() {
   const ws = document.getElementById('welcome-screen');
   if (!ws) return;
+  welcomeVisible = false;
   ws.classList.add('fade-out');
   setTimeout(() => ws.classList.add('hidden'), 500);
 }
+
+// 点击标题卡片回到欢迎屏
+document.addEventListener('DOMContentLoaded', () => {
+  const card = document.getElementById('title-overlay-card');
+  if (card) card.addEventListener('click', showWelcome);
+});
 
 async function welcomeSelectCity(name) {
   dismissWelcome();
