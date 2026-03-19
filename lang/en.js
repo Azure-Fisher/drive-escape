@@ -21,7 +21,7 @@ window.LANG = {
   pageTitle: 'Weekend Drive Escape - {city}',
   noResult: 'No results',
   searchFailed: 'Search failed',
-  welcomeHeadline: 'Where can you escape by car?',
+  welcomeHeadline: 'Weekend Self-Drive Escape Plan',
   welcomeSub: 'Enter your city and explore how far you can drive in a weekend',
   welcomeQuickLabel: 'Popular cities',
   welcomeCities: ['London', 'Paris', 'Tokyo', 'Shanghai', 'Sydney']

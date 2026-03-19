@@ -21,7 +21,7 @@ window.LANG = {
   pageTitle: '周末自驾逃离计划 - {city}版',
   noResult: '无结果',
   searchFailed: '搜索失败',
-  welcomeHeadline: '你能从这里开车逃离吗？',
+  welcomeHeadline: '周末自驾逃离计划',
   welcomeSub: '输入出发城市，探索你的驾车逃离范围',
   welcomeQuickLabel: '热门城市',
   welcomeCities: ['杭州', '上海', '北京', '成都', '西安']
