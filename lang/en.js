@@ -20,5 +20,9 @@ window.LANG = {
   estimated: '(est.)',
   pageTitle: 'Weekend Drive Escape - {city}',
   noResult: 'No results',
-  searchFailed: 'Search failed'
+  searchFailed: 'Search failed',
+  welcomeHeadline: 'Where can you escape by car?',
+  welcomeSub: 'Enter your city and explore how far you can drive in a weekend',
+  welcomeQuickLabel: 'Popular cities',
+  welcomeCities: ['London', 'Paris', 'Tokyo', 'Sydney']
 };

@@ -20,5 +20,9 @@ window.LANG = {
   estimated: '(估算)',
   pageTitle: '週末自駕逃離計畫 - {city}版',
   noResult: '無結果',
-  searchFailed: '搜尋失敗'
+  searchFailed: '搜尋失敗',
+  welcomeHeadline: '你能從這裡開車逃離嗎？',
+  welcomeSub: '輸入出發城市，探索你的自駕逃離範圍',
+  welcomeQuickLabel: '熱門城市',
+  welcomeCities: ['台北', '台中', '高雄']
 };

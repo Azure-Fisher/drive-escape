@@ -20,5 +20,9 @@ window.LANG = {
   estimated: '(推定)',
   pageTitle: '週末ドライブ脱出計画 - {city}',
   noResult: '結果なし',
-  searchFailed: '検索に失敗しました'
+  searchFailed: '検索に失敗しました',
+  welcomeHeadline: 'ここからドライブで逃げられる？',
+  welcomeSub: '出発都市を入力して、ドライブの逃走範囲を探ろう',
+  welcomeQuickLabel: '人気の都市',
+  welcomeCities: ['東京', '大阪', '京都']
 };
