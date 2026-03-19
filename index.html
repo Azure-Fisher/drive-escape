@@ -818,7 +818,8 @@ const colorBands = [
 
 const MAX_DRIVE_HOURS = 5.0; // 超过此时间的区县不显示
 
-const MAX_STRAIGHT_KM = 400; // 直线距离上限，防止飞地
+const MAX_STRAIGHT_KM = 400;
+const CACHE_VERSION = 'v2'; // 缓存版本，用于清除旧缓存 // 直线距离上限，防止飞地
 
 
 
@@ -1906,7 +1907,7 @@ async function switchCity(name, lng, lat, countryCode) {
   activeLayers._provOutlines = provinceOutlines;
 
   // 8. 检查本地缓存（用城市坐标作为 key）
-  const cacheKey = `drive_${lng.toFixed(2)}_${lat.toFixed(2)}`;
+  const cacheKey = `drive_${CACHE_VERSION}_${lng.toFixed(2)}_${lat.toFixed(2)}_${currentTransport}`;
   let cached = null;
   try { cached = JSON.parse(localStorage.getItem(cacheKey)); } catch(e) {}
 
@@ -1934,34 +1935,39 @@ async function switchCity(name, lng, lat, countryCode) {
 
     requestAnimationFrame(syncSearchWidth);
 
-  } else {
 
-    // 无缓存：先用估算数据渲染，再 OSRM 精确化
 
-    clearTimeout(globalTimeout);
+    // 9. 仅自驾模式才调用 OSRM 精确化驾车时间（高铁/骑行用估算值即可）
 
-    renderMap();
+    if (currentTransport === 'car') {
 
-    hideLoading();
+      // OSRM 批量计算真实驾车时间（逐批更新渲染）
 
-    updateURL(name);
+      const destinations = [];
 
-    requestAnimationFrame(syncSearchWidth);
+      for (const f of allCountyFeatures) {
 
-    // 9. OSRM 批量计算真实驾车时间（逐批更新渲染）
-    const destinations = [];
-    for (const f of allCountyFeatures) {
-      const code = String(f?.properties?.adcode || "");
-      const center = f?.properties?.centroid || f?.properties?.center;
-      const fname = f?.properties?.name || "";
-      if (center && center.length === 2) {
-        destinations.push({ adcode: code, lng: center[0], lat: center[1], name: fname });
+        const code = String(f?.properties?.adcode || "");
+
+        const center = f?.properties?.centroid || f?.properties?.center;
+
+        const fname = f?.properties?.name || "";
+
+        if (center && center.length === 2) {
+
+          destinations.push({ adcode: code, lng: center[0], lat: center[1], name: fname });
+
+        }
+
       }
-    }
 
-    const batchSize = 50;
-    const osrmCache = {};
-    const batches = [];
+
+
+      const batchSize = 50;
+
+      const osrmCache = {};
+
+      const batches = [];
     for (let i = 0; i < destinations.length; i += batchSize) {
       batches.push(destinations.slice(i, i + batchSize));
     }
@@ -2001,21 +2007,20 @@ async function switchCity(name, lng, lat, countryCode) {
       showLoading(t('loadingDriveTime', { done: String(bi + 1), total: String(batches.length) }));
       renderMap(true);
     }
-    hideLoading();
-
-
-
-    // 保存到 localStorage
-
-    try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
-
-  }
-
-
-
-  // 更新 URL
-
+    hideLoading();
+
+    // 保存到 localStorage（仅自驾模式缓存 OSRM 数据）
+    try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
+    } // end if (currentTransport === 'car')
+  } // end else (no cache)
+
+  // 更新 URL
   updateURL(name);
+
+  // 确保 UI 显示正确的交通方式
+  const ts = document.getElementById('transport-select');
+  if (ts) ts.value = currentTransport;
+
 
   } catch(e) {
 
