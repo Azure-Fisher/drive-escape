@@ -1368,6 +1368,7 @@ async function switchCity(name, lng, lat, countryCode) {
 
     // 根据国家选择合适的行政级别
     const isJapan = countryCode === 'jp';
+    const isAustralia = countryCode === 'au';
     // 欧洲国家列表（level 8 = 市/区/镇，统一处理）
     const EUROPE_CODES = new Set(['gb','fr','de','it','es','pt','nl','be','at','ch','pl','cz','se','no','dk','fi','ie','hu','ro','bg','hr','sk','si','lt','lv','ee','lu','gr']);
     const isEurope = EUROPE_CODES.has(countryCode);
@@ -1377,6 +1378,9 @@ async function switchCity(name, lng, lat, countryCode) {
       { radius: 400000, levels: "4", labelKey: "loadingAdmin" },
       { radius: 400000, levels: "7", labelKey: "loadingDetail" },
       { radius: 200000, levels: "8", labelKey: "loadingDetail" }
+    ] : isAustralia ? [
+      // 澳大利亚：level 6 = Local Government Area（Council），半径缩小避免数据过大
+      { radius: 300000, levels: "6", labelKey: "loadingAdmin" }
     ] : isEurope ? [
       // 欧洲：level 4 补充城市州(柏林/汉堡等), level 6 = 省/郡, level 8 = 市镇/Borough
       { radius: 100000, levels: "4|5", labelKey: "loadingAdmin" },
