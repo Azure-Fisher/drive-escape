@@ -23,106 +23,247 @@
 
     #map { width: 100%; height: 100%; background: #e8e4d8; }
 
-    /* 标题浮层 */
+    /* 主题色变量 - 默认绿色（自驾） */
+
+    :root {
+
+      --theme-primary: #1a6e5c;
+
+      --theme-primary-light: #2d9f83;
+
+      --theme-bg: rgba(255,255,255,0.95);
+
+    }
+
+
+
+    /* 标题浮层 - 精简为两行 */
+
     .title-overlay {
+
       position: fixed;
+
       top: 12px;
+
       left: 50%;
+
       transform: translateX(-50%);
+
       z-index: 1000;
+
       text-align: center;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 10px 24px;
-      border-radius: 14px;
+
+      background: var(--theme-bg);
+
+      backdrop-filter: blur(12px);
+
+      -webkit-backdrop-filter: blur(12px);
+
+      padding: 8px 20px;
+
+      border-radius: 12px;
+
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
       cursor: pointer;
 
       white-space: nowrap;
 
-      transition: box-shadow 0.15s;
+      transition: box-shadow 0.15s, border-color 0.3s;
 
-      max-width: calc(100vw - 320px);
+      border: 2px solid var(--theme-primary);
+
+      max-width: calc(100vw - 280px);
 
     }
 
     .title-overlay:hover {
 
-      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-    }
-    .title-overlay .en {
-      font-size: 10px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #666;
-    }
-    .title-overlay h1 {
-      font: 900 24px/1.2 "Noto Serif SC", serif;
-      color: #1c1c1c;
-      margin: 2px 0;
-    }
-    .title-overlay .sub {
-      font: 700 13px/1.2 "Noto Serif SC", serif;
-      color: #1a6e5c;
-      letter-spacing: 0.1em;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+
     }
 
-    /* 顶部右侧控件栏 */
-    .top-controls {
-      position: fixed;
-      top: 12px;
-      right: 16px;
-      z-index: 1001;
-      display: flex;
-      gap: 8px;
-      align-items: flex-start;
+    .title-overlay h1 {
+
+      font: 700 20px/1.2 "Noto Serif SC", serif;
+
+      color: #1c1c1c;
+
+      margin: 0;
+
     }
+
+    .title-overlay .sub {
+
+      font: 600 12px/1.3 system-ui, sans-serif;
+
+      color: var(--theme-primary);
+
+      margin-top: 2px;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 6px;
+
+    }
+
+    /* 顶部控件栏 - 整合布局 */
+
+    .top-controls {
+
+      position: fixed;
+
+      top: 12px;
+
+      right: 16px;
+
+      z-index: 1001;
+
+      display: flex;
+
+      gap: 10px;
+
+      align-items: center;
+
+    }
+
+
 
     /* 搜索框 */
+
     .search-box {
-      width: 220px;
+
+      width: 200px;
+
     }
+
     .search-box input {
+
       width: 100%;
-      padding: 8px 14px;
-      border: none;
+
+      padding: 10px 16px;
+
+      border: 2px solid transparent;
+
       border-radius: 10px;
-      background: rgba(255,255,255,0.92);
+
+      background: var(--theme-bg);
+
       backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      font-size: 13px;
+
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+
+      font-size: 14px;
+
       outline: none;
-      font-family: system-ui, -apple-system, sans-serif;
+
+      transition: border-color 0.2s, box-shadow 0.2s;
+
     }
-    .search-box input::placeholder { color: #aaa; }
-    .search-box input:focus { box-shadow: 0 4px 20px rgba(0,0,0,0.18); }
+
+    .search-box input::placeholder { color: #999; }
+
+    .search-box input:focus {
+
+      border-color: var(--theme-primary);
+
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+
+    }
+
+
+
+    /* 交通方式按钮组 */
+
+    .transport-buttons {
+
+      display: flex;
+
+      gap: 4px;
+
+      background: var(--theme-bg);
+
+      padding: 4px;
+
+      border-radius: 10px;
+
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+
+    }
+
+    .transport-btn {
+
+      padding: 8px 14px;
+
+      border: none;
+
+      border-radius: 8px;
+
+      background: transparent;
+
+      font-size: 13px;
+
+      cursor: pointer;
+
+      transition: all 0.2s;
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 4px;
+
+      color: #666;
+
+    }
+
+    .transport-btn:hover {
+
+      background: rgba(0,0,0,0.05);
+
+    }
+
+    .transport-btn.active {
+
+      background: var(--theme-primary);
+
+      color: white;
+
+      font-weight: 600;
+
+    }
+
+    .transport-btn.active:hover {
+
+      background: var(--theme-primary);
+
+    }
+
+
 
     /* 语言切换器 */
-    .lang-switcher select,
 
-    .transport-switcher select {
+    .lang-switcher select {
 
-      padding: 8px 10px;
+      padding: 10px 14px;
 
       border: none;
 
       border-radius: 10px;
 
-      background: rgba(255,255,255,0.92);
+      background: var(--theme-bg);
 
       backdrop-filter: blur(8px);
 
-      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-
-      font-size: 12px;
+      font-size: 13px;
 
       outline: none;
-
-      font-family: system-ui, -apple-system, sans-serif;
 
       cursor: pointer;
 
@@ -132,41 +273,15 @@
 
       appearance: none;
 
-      padding-right: 22px;
+      padding-right: 28px;
 
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
 
       background-repeat: no-repeat;
 
-      background-position: right 8px center;
+      background-position: right 10px center;
 
     }
-
-    /* 往返筛选 */
-
-    .roundtrip-filter {
-
-      background: rgba(255,255,255,0.92);
-
-      backdrop-filter: blur(8px);
-
-      -webkit-backdrop-filter: blur(8px);
-
-      border-radius: 10px;
-
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-
-      padding: 6px 12px;
-
-      font-size: 12px;
-
-      color: #333;
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 6px;
 
       cursor: pointer;
 
@@ -255,46 +370,174 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* 图例 */
+    /* 图例 - 优化样式 */
+
     .leaflet-control-zoom { display: none !important; }
+
     .legend {
+
       position: fixed;
+
       left: 12px;
+
       bottom: 24px;
+
       z-index: 1000;
-      width: 150px;
-      padding: 10px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 10px;
+
+      width: 160px;
+
+      padding: 14px;
+
+      background: var(--theme-bg);
+
+      backdrop-filter: blur(12px);
+
+      -webkit-backdrop-filter: blur(12px);
+
+      border-radius: 12px;
+
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      font-size: 10px;
+
+      font-size: 11px;
+
+      border: 1px solid rgba(0,0,0,0.08);
+
     }
-    .legend h3 { font-size: 12px; margin-bottom: 6px; }
-    .legend .item, .legend .band {
+
+    .legend-header {
+
       display: flex;
+
       align-items: center;
-      gap: 6px;
-      margin: 3px 0;
+
+      gap: 8px;
+
+      margin-bottom: 10px;
+
+      padding-bottom: 10px;
+
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+
     }
+
+    .legend-header .icon {
+
+      font-size: 18px;
+
+    }
+
+    .legend-header .info {
+
+      flex: 1;
+
+    }
+
+    .legend-header .title {
+
+      font-weight: 700;
+
+      font-size: 13px;
+
+      color: #1c1c1c;
+
+    }
+
+    .legend-header .desc {
+
+      font-size: 10px;
+
+      color: #666;
+
+      margin-top: 1px;
+
+    }
+
+    .legend h3 { font-size: 11px; margin-bottom: 8px; color: #333; }
+
+    .legend .item, .legend .band {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      margin: 4px 0;
+
+    }
+
     .legend .swatch {
-      width: 16px; height: 10px;
-      border: 1px solid rgba(0,0,0,0.2);
+
+      width: 20px; height: 12px;
+
+      border-radius: 2px;
+
       flex-shrink: 0;
+
     }
+
     .legend .line-swatch {
-      width: 16px; height: 0;
+
+      width: 20px; height: 0;
+
       flex-shrink: 0;
+
     }
+
     .legend .line-swatch.city { border-top: 2px solid #6b4c8a; }
+
     .legend .line-swatch.prov { border-top: 2px dashed #888; }
+
     .legend .line-swatch.origin { border-top: 3px solid #e88; }
+
     .legend .hatch {
-      width: 16px; height: 10px;
+
+      width: 20px; height: 12px;
+
       flex-shrink: 0;
-      border: 1px solid rgba(0,0,0,0.2);
+
+      border-radius: 2px;
+
       background: repeating-linear-gradient(45deg, #aa2211, #aa2211 3px, #fff 3px, #fff 6px);
+
+    }
+
+    .legend-filter {
+
+      margin-top: 12px;
+
+      padding-top: 12px;
+
+      border-top: 1px solid rgba(0,0,0,0.08);
+
+    }
+
+    .legend-filter label {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      cursor: pointer;
+
+      font-size: 11px;
+
+      color: #333;
+
+    }
+
+    .legend-filter input[type="checkbox"] {
+
+      width: 16px;
+
+      height: 16px;
+
+      accent-color: var(--theme-primary);
+
+      cursor: pointer;
+
     }
 
     /* 县区标签 */
@@ -626,31 +869,19 @@
 
   </div>
 
-  <div class="transport-switcher">
 
-    <select id="transport-select">
 
-      <option value="car">🚗 自驾</option>
+  <div class="transport-buttons" id="transport-buttons">
 
-      <option value="train">🚄 高铁</option>
+    <button class="transport-btn active" data-value="car">🚗 自驾</button>
 
-      <option value="bike">🚴 骑行</option>
+    <button class="transport-btn" data-value="train">🚄 高铁</button>
 
-    </select>
+    <button class="transport-btn" data-value="bike">🚴 骑行</button>
 
   </div>
 
-  <div class="roundtrip-filter">
 
-    <label>
-
-      <input type="checkbox" id="roundtrip-filter" />
-
-      <span>仅往返≤8h</span>
-
-    </label>
-
-  </div>
 
   <div class="lang-switcher">
 
@@ -678,12 +909,37 @@
 </div>
 
 <aside class="legend">
-  <h3>图例</h3>
-  <div class="item"><span class="hatch"></span><span>出发点</span></div>
-  <div class="item"><span class="line-swatch origin"></span><span id="legend-origin">出发市</span></div>
-  <div class="item"><span class="line-swatch prov"></span><span>省界</span></div>
-  <div class="item"><span class="line-swatch city"></span><span>市界</span></div>
+
+  <div class="legend-header">
+
+    <span class="icon" id="legend-icon">🚗</span>
+
+    <div class="info">
+
+      <div class="title" id="legend-title">自驾模式</div>
+
+      <div class="desc" id="legend-desc">85km/h · 5小时可达</div>
+
+    </div>
+
+  </div>
+
   <div id="band-list"></div>
+
+  <div class="item" style="margin-top: 10px;"><span class="hatch"></span><span>出发点</span></div>
+
+  <div class="legend-filter">
+
+    <label>
+
+      <input type="checkbox" id="roundtrip-filter" />
+
+      <span>仅往返≤8小时</span>
+
+    </label>
+
+  </div>
+
 </aside>
 
 <div class="info-panel" id="info">
@@ -1673,12 +1929,18 @@ async function getCityCenter(name, lng, lat) {
   return null; // fallback 用原坐标
 }
 
-async function switchCity(name, lng, lat, countryCode) {
-  // 新的 AbortController，取消旧请求
-  if (currentCityAbortController) currentCityAbortController.abort();
-  currentCityAbortController = new AbortController();
-
-  // 0. 校准城市中心坐标（Nominatim 对大面积城市返回几何中心，不是主城区）
+async function switchCity(name, lng, lat, countryCode) {
+
+  // 新的 AbortController，取消旧请求
+
+  if (currentCityAbortController) currentCityAbortController.abort();
+
+  currentCityAbortController = new AbortController();
+
+
+
+  // 0. 校准城市中心坐标（Nominatim 对大面积城市返回几何中心，不是主城区）
+
   const corrected = CITY_CENTERS[name] || CITY_CENTERS[name.replace(/市$/, '').replace(/白族自治州$/, '').replace(/自治州$/, '')];
 
   if (corrected) {
@@ -2250,54 +2512,61 @@ async function welcomeSelectCity(name) {
 
 // ── 交通方式和筛选控制 ──
 
-function initTransportControls() {
-
-  const transportSelect = document.getElementById('transport-select');
-
-  const roundtripCheckbox = document.getElementById('roundtrip-filter');
-
-
-
-  // 恢复保存的状态
-
-  if (transportSelect) {
-
-    transportSelect.value = currentTransport;
-
-    transportSelect.addEventListener('change', () => {
-
-      currentTransport = transportSelect.value;
-
-      localStorage.setItem('transport', currentTransport);
-
-      // 重新计算所有区县的时间
-
-      recalculateAllTimes();
-
-      renderMap(true);
-
-    });
-
-  }
-
-
-
-  if (roundtripCheckbox) {
-
-    roundtripCheckbox.checked = roundtripFilterEnabled;
-
-    roundtripCheckbox.addEventListener('change', () => {
-
-      roundtripFilterEnabled = roundtripCheckbox.checked;
-
-      localStorage.setItem('roundtripFilter', roundtripFilterEnabled);
-
-      renderMap(true);
-
-    });
-
-  }
-
+// 交通方式配置和主题色
+const TRANSPORT_THEMES = {
+  car: { primary: '#1a6e5c', light: '#2d9f83', name: '自驾', speed: '85km/h', icon: '🚗' },
+  train: { primary: '#2563eb', light: '#3b82f6', name: '高铁', speed: '250km/h', icon: '🚄' },
+  bike: { primary: '#ea580c', light: '#f97316', name: '骑行', speed: '15km/h', icon: '🚴' }
+};
+
+function updateTheme(transport) {
+  const theme = TRANSPORT_THEMES[transport];
+  document.documentElement.style.setProperty('--theme-primary', theme.primary);
+  document.documentElement.style.setProperty('--theme-primary-light', theme.light);
+
+  // 更新图例
+  const legendIcon = document.getElementById('legend-icon');
+  const legendTitle = document.getElementById('legend-title');
+  const legendDesc = document.getElementById('legend-desc');
+  if (legendIcon) legendIcon.textContent = theme.icon;
+  if (legendTitle) legendTitle.textContent = theme.name + '模式';
+  if (legendDesc) legendDesc.textContent = theme.speed + ' · 5小时可达';
+}
+
+function initTransportControls() {
+  const transportButtons = document.getElementById('transport-buttons');
+  const roundtripCheckbox = document.getElementById('roundtrip-filter');
+
+  // 恢复保存的状态并绑定按钮事件
+  if (transportButtons) {
+    const buttons = transportButtons.querySelectorAll('.transport-btn');
+    buttons.forEach(btn => {
+      if (btn.dataset.value === currentTransport) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTransport = btn.dataset.value;
+        localStorage.setItem('transport', currentTransport);
+        updateTheme(currentTransport);
+        recalculateAllTimes();
+        renderMap(true);
+      });
+    });
+    updateTheme(currentTransport);
+  }
+
+  if (roundtripCheckbox) {
+    roundtripCheckbox.checked = roundtripFilterEnabled;
+    roundtripCheckbox.addEventListener('change', () => {
+      roundtripFilterEnabled = roundtripCheckbox.checked;
+      localStorage.setItem('roundtripFilter', roundtripFilterEnabled);
+      renderMap(true);
+    });
+  }
 }
 
 
