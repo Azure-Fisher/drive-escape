@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>周末自驾逃离计划</title>
+  <title>周末逃离计划</title>
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-7R2BCNPBSP"></script>
   <script>
@@ -15,95 +15,111 @@
   <script src="lang/zh-CN.js?v=2" id="lang-script"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: system-ui, -apple-system, sans-serif; }
 
+    
 
-
-    #map { width: 100%; height: 100%; background: #e8e4d8; }
-
-
-
-    /* 主题色变量 */
+    /* MD3 Design Tokens */
 
     :root {
 
-      --theme-primary: #1a6e5c;
+      /* Primary Colors - 自驾(绿) */
+
+      --md-primary: #1a6e5c;
+
+      --md-on-primary: #ffffff;
+
+      --md-primary-container: #e8f5e9;
+
+      --md-on-primary-container: #1a6e5c;
+
+      /* Surface Colors */
+
+      --md-surface: #ffffff;
+
+      --md-surface-variant: #f5f5f5;
+
+      --md-on-surface: #1c1c1c;
+
+      --md-on-surface-variant: #666666;
+
+      --md-outline: #e0e0e0;
+
+      /* Elevation */
+
+      --md-elevation-1: 0 1px 3px rgba(0,0,0,0.12);
+
+      --md-elevation-2: 0 2px 6px rgba(0,0,0,0.15);
+
+      --md-elevation-3: 0 4px 12px rgba(0,0,0,0.15);
 
     }
 
+    [data-theme="train"] { --md-primary: #2563eb; }
 
+    [data-theme="bike"] { --md-primary: #ea580c; }
+
+    
+
+    html, body { height: 100%; font-family: 'Noto Sans SC', system-ui, -apple-system, sans-serif; }
+
+    #map { width: 100%; height: 100%; background: #e8e4d8; }
 
     /* 标题浮层 */
-
     .title-overlay {
-
       position: fixed;
-
       top: 12px;
-
       left: 50%;
-
       transform: translateX(-50%);
-
       z-index: 1000;
-
       text-align: center;
-
-      background: rgba(255,255,255,0.95);
-
-      backdrop-filter: blur(12px);
-
-      -webkit-backdrop-filter: blur(12px);
-
-      padding: 8px 20px;
-
-      border-radius: 12px;
-
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 10px 24px;
+      border-radius: 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-
       cursor: pointer;
 
       white-space: nowrap;
 
-      transition: box-shadow 0.15s, border-color 0.3s;
+      transition: box-shadow 0.15s;
 
-      border: 2px solid var(--theme-primary);
-
-      max-width: calc(100vw - 280px);
+      max-width: calc(100vw - 320px);
 
     }
 
     .title-overlay:hover {
 
-      box-shadow: 0 6px 28px rgba(0,0,0,0.18);
-
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
     }
-
+    .title-overlay .en {
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #666;
+    }
     .title-overlay h1 {
 
-      font: 700 20px/1.2 "Noto Serif SC", serif;
+      font: 600 24px/1.2 'Noto Sans SC', sans-serif;
 
-      color: #1c1c1c;
+      color: var(--md-on-surface);
 
-      margin: 0;
+      margin: 2px 0;
 
     }
-
     .title-overlay .sub {
 
-      font: 600 12px/1.3 system-ui, sans-serif;
+      font: 700 13px/1.2 "Noto Serif SC", serif;
 
-      color: var(--theme-primary);
+      color: var(--md-primary);
 
-      margin-top: 2px;
+      letter-spacing: 0.1em;
 
     }
-
-
 
     /* 顶部右侧控件栏 */
     .top-controls {
@@ -116,11 +132,11 @@
       align-items: flex-start;
     }
 
-    /* 搜索框 */
+    /* 搜索框 - MD3风格 */
 
     .search-box {
 
-      width: 200px;
+      width: 240px;
 
     }
 
@@ -128,173 +144,169 @@
 
       width: 100%;
 
-      padding: 10px 16px;
+      height: 44px;
 
-      border: 2px solid transparent;
+      padding: 0 16px;
 
-      border-radius: 10px;
+      border: 1px solid var(--md-outline);
 
-      background: rgba(255,255,255,0.95);
+      border-radius: 22px;
 
-      backdrop-filter: blur(8px);
+      background: var(--md-surface);
 
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      font-size: 15px;
+
+      outline: none;
+
+      font-family: 'Noto Sans SC', system-ui, sans-serif;
+
+      color: var(--md-on-surface);
+
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+    }
+
+    .search-box input::placeholder { color: var(--md-on-surface-variant); }
+
+    .search-box input:hover { border-color: var(--md-on-surface-variant); }
+
+    .search-box input:focus { 
+
+      border-color: var(--md-primary);
+
+      box-shadow: 0 0 0 1px var(--md-primary);
+
+    }
+
+    /* 语言切换器 - MD3风格 */
+
+    .lang-switcher select {
+
+      height: 44px;
+
+      padding: 0 36px 0 14px;
+
+      border: 1px solid var(--md-outline);
+
+      border-radius: 22px;
+
+      background: var(--md-surface);
 
       font-size: 14px;
 
       outline: none;
 
-      transition: border-color 0.2s;
+      font-family: 'Noto Sans SC', system-ui, sans-serif;
 
-    }
-
-    .search-box input::placeholder { color: #999; }
-
-    .search-box input:focus {
-
-      border-color: var(--theme-primary);
-
-    }
-
-
-
-    /* 交通方式按钮组 */
-
-    .transport-buttons {
-
-      display: flex;
-
-      gap: 4px;
-
-      background: rgba(255,255,255,0.95);
-
-      padding: 4px;
-
-      border-radius: 10px;
-
-      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-
-    }
-
-    .transport-btn {
-
-      padding: 8px 14px;
-
-      border: none;
-
-      border-radius: 8px;
-
-      background: transparent;
-
-      font-size: 13px;
+      color: var(--md-on-surface);
 
       cursor: pointer;
-
-      transition: all 0.2s;
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 4px;
-
-      color: #666;
-
-    }
-
-    .transport-btn:hover { background: rgba(0,0,0,0.05); }
-
-    .transport-btn.active {
-
-      background: var(--theme-primary);
-
-      color: white;
-
-      font-weight: 600;
-
-    }
-
-
-
-    /* 语言切换器 */
-
-    .lang-switcher select, .transport-switcher select {
-
-      padding: 8px 10px;
-
-      border: none;
-
-      border-radius: 10px;
-
-      background: rgba(255,255,255,0.92);
-
-      backdrop-filter: blur(8px);
-
-      -webkit-backdrop-filter: blur(8px);
-
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-
-      font-size: 12px;
-
-      outline: none;
-
-      font-family: system-ui, -apple-system, sans-serif;
-
-      cursor: pointer;
-
-      color: #333;
 
       -webkit-appearance: none;
 
       appearance: none;
 
-      padding-right: 22px;
-
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
 
       background-repeat: no-repeat;
 
-      background-position: right 8px center;
+      background-position: right 12px center;
+
+      transition: border-color 0.2s;
 
     }
 
-    /* 往返筛选 */
+    .lang-switcher select:hover { border-color: var(--md-on-surface-variant); }
+
+    .lang-switcher select:focus { border-color: var(--md-primary); }
+
+
+
+    /* 出行方式选择器 - MD3风格 */
+
+    .transport-switcher select {
+
+      height: 44px;
+
+      padding: 0 36px 0 14px;
+
+      border: 1px solid var(--md-outline);
+
+      border-radius: 22px;
+
+      background: var(--md-surface);
+
+      font-size: 14px;
+
+      font-family: 'Noto Sans SC', system-ui, sans-serif;
+
+      color: var(--md-on-surface);
+
+      cursor: pointer;
+
+      outline: none;
+
+      -webkit-appearance: none;
+
+      appearance: none;
+
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%23666' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+
+      background-repeat: no-repeat;
+
+      background-position: right 12px center;
+
+      transition: border-color 0.2s;
+
+    }
+
+    .transport-switcher select:hover { border-color: var(--md-on-surface-variant); }
+
+    .transport-switcher select:focus { border-color: var(--md-primary); }
+
+
+
+    /* 往返筛选 - MD3风格 */
 
     .roundtrip-filter {
 
-      background: rgba(255,255,255,0.92);
+      height: 44px;
 
-      backdrop-filter: blur(8px);
+      padding: 0 16px;
 
-      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--md-outline);
 
-      border-radius: 10px;
+      border-radius: 22px;
 
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      background: var(--md-surface);
 
-      padding: 6px 12px;
+      font-size: 14px;
 
-      font-size: 12px;
+      font-family: 'Noto Sans SC', system-ui, sans-serif;
 
-      color: #333;
+      color: var(--md-on-surface);
 
       display: flex;
 
       align-items: center;
 
-      gap: 6px;
+      gap: 8px;
 
       cursor: pointer;
 
+      transition: border-color 0.2s;
+
     }
+
+    .roundtrip-filter:hover { border-color: var(--md-on-surface-variant); }
 
     .roundtrip-filter input[type="checkbox"] {
 
-      width: 14px;
+      width: 18px;
 
-      height: 14px;
+      height: 18px;
 
-      accent-color: #1a6e5c;
+      accent-color: var(--md-primary);
 
       cursor: pointer;
 
@@ -306,7 +318,7 @@
 
       align-items: center;
 
-      gap: 6px;
+      gap: 8px;
 
       cursor: pointer;
 
@@ -372,147 +384,45 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* 图例 */
-
     .leaflet-control-zoom { display: none !important; }
-
     .legend {
-
       position: fixed;
-
       left: 12px;
-
       bottom: 24px;
-
       z-index: 1000;
-
-      width: 165px;
-
-      padding: 14px;
-
-      background: rgba(255,255,255,0.95);
-
-      backdrop-filter: blur(12px);
-
-      border-radius: 12px;
-
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-
-      font-size: 11px;
-
-      border: 1px solid rgba(0,0,0,0.06);
-
+      width: 150px;
+      padding: 10px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      font-size: 10px;
     }
-
-    .legend-header {
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 10px;
-
-      margin-bottom: 12px;
-
-      padding-bottom: 10px;
-
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-
-    }
-
-    .legend-header .icon { font-size: 20px; }
-
-    .legend-header .info { flex: 1; }
-
-    .legend-header .title { font-weight: 700; font-size: 13px; color: #1c1c1c; }
-
-    .legend-header .desc { font-size: 10px; color: #666; margin-top: 1px; }
-
-    .legend h3 { font-size: 11px; margin-bottom: 8px; color: #444; }
-
+    .legend h3 { font-size: 12px; margin-bottom: 6px; }
     .legend .item, .legend .band {
-
       display: flex;
-
       align-items: center;
-
-      gap: 8px;
-
-      margin: 4px 0;
-
+      gap: 6px;
+      margin: 3px 0;
     }
-
     .legend .swatch {
-
-      width: 20px; height: 12px;
-
-      border-radius: 2px;
-
+      width: 16px; height: 10px;
+      border: 1px solid rgba(0,0,0,0.2);
       flex-shrink: 0;
-
     }
-
     .legend .line-swatch {
-
-      width: 20px; height: 0;
-
+      width: 16px; height: 0;
       flex-shrink: 0;
-
     }
-
     .legend .line-swatch.city { border-top: 2px solid #6b4c8a; }
-
     .legend .line-swatch.prov { border-top: 2px dashed #888; }
-
     .legend .line-swatch.origin { border-top: 3px solid #e88; }
-
     .legend .hatch {
-
-      width: 20px; height: 12px;
-
+      width: 16px; height: 10px;
       flex-shrink: 0;
-
-      border-radius: 2px;
-
+      border: 1px solid rgba(0,0,0,0.2);
       background: repeating-linear-gradient(45deg, #aa2211, #aa2211 3px, #fff 3px, #fff 6px);
-
-    }
-
-    .legend-divider {
-
-      height: 1px;
-
-      background: rgba(0,0,0,0.08);
-
-      margin: 10px 0;
-
-    }
-
-    .legend-filter label {
-
-      display: flex;
-
-      align-items: center;
-
-      gap: 8px;
-
-      cursor: pointer;
-
-      font-size: 11px;
-
-      color: #333;
-
-    }
-
-    .legend-filter input[type="checkbox"] {
-
-      width: 16px;
-
-      height: 16px;
-
-      accent-color: var(--theme-primary);
-
-      cursor: pointer;
-
     }
 
     /* 县区标签 */
@@ -675,14 +585,23 @@
 
     /* ── 欢迎屏 ── */
     #welcome-screen {
+
       position: fixed;
+
       inset: 0;
+
       z-index: 2000;
+
       background: #e8e4d8;
+
       display: flex;
+
       align-items: center;
+
       justify-content: center;
+
       transition: opacity 0.5s ease;
+
     }
     #welcome-screen.fade-out {
       opacity: 0;
@@ -701,36 +620,65 @@
       text-align: center;
     }
     .welcome-eyebrow {
-      font: 700 11px/1 system-ui, sans-serif;
-      letter-spacing: 0.12em;
+
+      font: 500 12px/1 'Noto Sans SC', sans-serif;
+
+      letter-spacing: 0.1em;
+
       text-transform: uppercase;
-      color: #1a6e5c;
+
+      color: var(--md-primary);
+
       margin-bottom: 16px;
     }
     .welcome-headline {
-      font: 900 26px/1.3 "Noto Serif SC", serif;
-      color: #1c1c1c;
+
+      font: 600 28px/1.3 'Noto Sans SC', sans-serif;
+
+      color: var(--md-on-surface);
+
       margin-bottom: 10px;
+
     }
     .welcome-sub {
-      font: 400 14px/1.6 system-ui, sans-serif;
-      color: #888;
+
+      font: 400 16px/1.6 'Noto Sans SC', sans-serif;
+
+      color: var(--md-on-surface-variant);
+
       margin-bottom: 28px;
+
     }
     .welcome-search-wrap {
       position: relative;
     }
     .welcome-search-wrap input {
+
       width: 100%;
-      padding: 12px 44px 12px 16px;
-      border: none;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.92);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-      font: 400 15px system-ui, sans-serif;
-      color: #1c1c1c;
+
+      height: 56px;
+
+      padding: 0 48px 0 20px;
+
+      border: 1px solid var(--md-outline);
+
+      border-radius: 28px;
+
+      background: var(--md-surface);
+
+      font: 400 16px 'Noto Sans SC', sans-serif;
+
+      color: var(--md-on-surface);
+
       outline: none;
+
+      transition: border-color 0.2s, box-shadow 0.2s;
+
     }
+
+    .welcome-search-wrap input:hover { border-color: var(--md-on-surface-variant); }
+
+    .welcome-search-wrap input:focus { border-color: var(--md-primary); }
     .welcome-search-wrap input::placeholder { color: #aaa; }
     .welcome-search-wrap .welcome-search-icon {
       position: absolute;
@@ -809,9 +757,11 @@
     </select>
   </div>
   <div class="welcome-card">
-    <div class="welcome-eyebrow" id="welcome-eyebrow">Drive Escape</div>
-    <div class="welcome-headline" id="welcome-headline">Where can you escape by car?</div>
-    <div class="welcome-sub" id="welcome-sub">Enter your city and explore how far you can drive in a weekend</div>
+    <div class="welcome-eyebrow" id="welcome-eyebrow">Weekend Escape</div>
+
+    <div class="welcome-headline" id="welcome-headline">周末想去哪？</div>
+
+    <div class="welcome-sub" id="welcome-sub">选择城市，探索你的5小时可达范围</div>
     <div class="welcome-search-wrap">
       <input type="text" id="welcome-input" autocomplete="off" spellcheck="false" placeholder="Search city..." />
       <span class="welcome-search-icon">⌕</span>
@@ -827,11 +777,12 @@
 <div id="map"></div>
 
 <div class="title-overlay" id="title-overlay-card">
+  <div class="title-text">
+    <div class="en">Weekend Escape Plan</div>
 
-  <h1>周末逃离计划</h1>
-
-  <div class="sub" id="title-sub">选择城市开始探索</div>
-
+    <h1>周末逃离计划</h1>
+    <div class="sub" id="title-sub">...</div>
+  </div>
 </div>
 
 <div class="top-controls">
@@ -844,17 +795,31 @@
 
   </div>
 
-  <div class="transport-buttons" id="transport-buttons">
+  <div class="transport-switcher">
 
-    <button class="transport-btn active" data-value="car">🚗 自驾</button>
+    <select id="transport-select">
 
-    <button class="transport-btn" data-value="train">🚄 高铁</button>
+      <option value="car">🚗 驾车</option>
 
-    <button class="transport-btn" data-value="bike">🚴 骑行</button>
+      <option value="train">🚄 高铁</option>
+
+      <option value="bike">🚴 骑行</option>
+
+    </select>
 
   </div>
 
+  <div class="roundtrip-filter">
 
+    <label>
+
+      <input type="checkbox" id="roundtrip-filter" />
+
+      <span>仅往返≤8h</span>
+
+    </label>
+
+  </div>
 
   <div class="lang-switcher">
 
@@ -882,41 +847,12 @@
 </div>
 
 <aside class="legend">
-
-  <div class="legend-header">
-
-    <span class="icon" id="legend-icon">🚗</span>
-
-    <div class="info">
-
-      <div class="title" id="legend-title">自驾模式</div>
-
-      <div class="desc" id="legend-desc">85km/h · 5小时可达</div>
-
-    </div>
-
-  </div>
-
-  <div id="band-list"></div>
-
-  <div class="legend-divider"></div>
-
+  <h3>图例</h3>
   <div class="item"><span class="hatch"></span><span>出发点</span></div>
-
-  <div class="legend-divider"></div>
-
-  <div class="legend-filter">
-
-    <label>
-
-      <input type="checkbox" id="roundtrip-filter" />
-
-      <span>仅往返≤8小时</span>
-
-    </label>
-
-  </div>
-
+  <div class="item"><span class="line-swatch origin"></span><span id="legend-origin">出发市</span></div>
+  <div class="item"><span class="line-swatch prov"></span><span>省界</span></div>
+  <div class="item"><span class="line-swatch city"></span><span>市界</span></div>
+  <div id="band-list"></div>
 </aside>
 
 <div class="info-panel" id="info">
@@ -946,22 +882,22 @@ function syncSearchWidth() {
 window.addEventListener('resize', syncSearchWidth);
 
 function applyLang() {
-
-  document.documentElement.lang = window.LANG?.code || 'zh-CN';
-
-  const titleH1 = document.querySelector('.title-overlay h1');
-  if (titleH1) titleH1.textContent = t('title');
-  const searchInput = document.getElementById('city-search');
-  if (searchInput) searchInput.placeholder = t('searchPlaceholder');
-
-  // legend items
-  const legendItem = document.querySelector('.legend .item span:last-child');
-  if (legendItem) legendItem.textContent = t('origin');
-
-  // subtitle and page title
-  if (typeof currentCityName !== 'undefined') {
-    document.getElementById('title-sub').textContent = t('subtitle', { city: currentCityName });
-    document.title = t('pageTitle', { city: currentCityName });
+  document.documentElement.lang = window.LANG?.code || 'zh-CN';
+  document.querySelector('.title-overlay .en').textContent = t('titleEn');
+  document.querySelector('.title-overlay h1').textContent = t('title');
+  document.getElementById('city-search').placeholder = t('searchPlaceholder');
+  document.querySelector('.legend h3').textContent = t('legend');
+  // legend items: origin, originCity, provinceBorder, cityBorder
+  const legendItems = document.querySelectorAll('.legend > .item');
+  if (legendItems[0]) legendItems[0].querySelector('span:last-child').textContent = t('origin');
+  if (legendItems[1]) legendItems[1].querySelector('span:last-child').textContent = t('originCity', { city: typeof currentCityName !== 'undefined' ? currentCityName : '' });
+  if (legendItems[2]) legendItems[2].querySelector('span:last-child').textContent = t('provinceBorder');
+  if (legendItems[3]) legendItems[3].querySelector('span:last-child').textContent = t('cityBorder');
+  // subtitle and page title
+  if (typeof currentCityName !== 'undefined') {
+    document.getElementById('title-sub').textContent = t('subtitle', { city: currentCityName });
+    document.title = t('pageTitle', { city: currentCityName });
+    document.getElementById('legend-origin').textContent = t('originCity', { city: currentCityName });
   }
   // 同步搜索框宽度（手机端）
   requestAnimationFrame(syncSearchWidth);
@@ -1071,9 +1007,9 @@ const CACHE_VERSION = 'v2'; // 缓存版本，用于清除旧缓存 // 直线距
 
 const TRANSPORT_CONFIGS = {
 
-  car: {
-
-    name: '自驾',
+  car: {
+
+    name: '驾车',
 
     speed: 85,           // km/h 平均车速
 
@@ -1487,6 +1423,7 @@ async function searchCity(query) {
         searchResults.style.display = "none";
         // 立即同步更新标题和图例，不等 switchCity 内部流程
         document.getElementById("title-sub").textContent = t('subtitle', { city: name });
+        document.getElementById("legend-origin").textContent = t('originCity', { city: name });
         document.title = t('pageTitle', { city: name });
         showLoading(t('loading'));
         switchCity(name, lng, lat, cc);
@@ -1974,6 +1911,7 @@ async function switchCity(name, lng, lat, countryCode) {
 
   // 3. 更新标题
   document.getElementById("title-sub").textContent = t('subtitle', { city: name });
+  document.getElementById("legend-origin").textContent = t('originCity', { city: name });
   document.title = t('pageTitle', { city: name });
 
   // 4. loading
@@ -2413,6 +2351,8 @@ async function welcomeSelectCity(name) {
 
   document.getElementById("title-sub").textContent = t('subtitle', { city: name });
 
+  document.getElementById("legend-origin").textContent = t('originCity', { city: name });
+
   document.title = t('pageTitle', { city: name });
 
   updateURL(name);
@@ -2485,101 +2425,37 @@ async function welcomeSelectCity(name) {
 
 // ── 交通方式和筛选控制 ──
 
-// 交通方式主题配置
-
-const TRANSPORT_THEMES = {
-
-  car: { primary: '#1a6e5c' },
-
-  train: { primary: '#2563eb', name: '高铁', speed: '250km/h', icon: '🚄', desc: '含1小时进出站' },
-
-  bike: { primary: '#ea580c', name: '骑行', speed: '15km/h', icon: '🚴', desc: '' }
-
-};
-
-
-
-function updateTheme(transport) {
-
-  const theme = TRANSPORT_THEMES[transport];
-
-  if (theme) {
-
-    document.documentElement.style.setProperty('--theme-primary', theme.primary);
-
-    // 更新图例
-
-    const legendIcon = document.getElementById('legend-icon');
-
-    const legendTitle = document.getElementById('legend-title');
-
-    const legendDesc = document.getElementById('legend-desc');
-
-    if (legendIcon) legendIcon.textContent = theme.icon;
-
-    if (legendTitle) legendTitle.textContent = theme.name + '模式';
-
-    if (legendDesc) legendDesc.textContent = theme.speed + ' · 5小时可达' + (theme.desc ? '（' + theme.desc + '）' : '');
-
-  }
-
-}
-
-
-
 function initTransportControls() {
 
-  const transportButtons = document.getElementById('transport-buttons');
+  const transportSelect = document.getElementById('transport-select');
 
   const roundtripCheckbox = document.getElementById('roundtrip-filter');
 
 
 
-  // 初始化主题色
+  // 恢复保存的状态
 
-  updateTheme(currentTransport);
+  if (transportSelect) {
 
+    transportSelect.value = currentTransport;
 
+    transportSelect.addEventListener('change', () => {
 
-  // 交通方式按钮事件
+      currentTransport = transportSelect.value;
 
-  if (transportButtons) {
+      localStorage.setItem('transport', currentTransport);
 
-    const buttons = transportButtons.querySelectorAll('.transport-btn');
+      // 重新计算所有区县的时间
 
-    buttons.forEach(btn => {
+      recalculateAllTimes();
 
-      if (btn.dataset.value === currentTransport) {
-
-        btn.classList.add('active');
-
-      }
-
-      btn.addEventListener('click', () => {
-
-        buttons.forEach(b => b.classList.remove('active'));
-
-        btn.classList.add('active');
-
-        currentTransport = btn.dataset.value;
-
-        localStorage.setItem('transport', currentTransport);
-
-        updateTheme(currentTransport);
-
-        recalculateAllTimes();
-
-        renderMap(true);
-
-      });
+      renderMap(true);
 
     });
 
   }
 
 
-
-  // 往返筛选
 
   if (roundtripCheckbox) {
 
@@ -2669,6 +2545,7 @@ function recalculateAllTimes() {
     dismissWelcome();
     showLoading(t('loading'));
     document.getElementById("title-sub").textContent = t('subtitle', { city: urlCity });
+    document.getElementById("legend-origin").textContent = t('originCity', { city: urlCity });
     document.title = t('pageTitle', { city: urlCity });
     searchInput.value = urlCity;
 
