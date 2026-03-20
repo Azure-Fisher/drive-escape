@@ -2007,14 +2007,22 @@ async function switchCity(name, lng, lat, countryCode) {
       showLoading(t('loadingDriveTime', { done: String(bi + 1), total: String(batches.length) }));
       renderMap(true);
     }
-    hideLoading();
-
-    // 保存到 localStorage（仅自驾模式缓存 OSRM 数据）
-    try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
-    } // end if (currentTransport === 'car')
-  } // end else (no cache)
-
-  // 更新 URL
+    hideLoading();
+
+
+
+    // 保存到 localStorage（仅自驾模式缓存 OSRM 数据）
+
+    try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
+
+    } // end if (currentTransport === 'car')
+
+  } // end else (no cache)
+
+
+
+  // 更新 URL
+
   updateURL(name);
 
   // 确保 UI 显示正确的交通方式
@@ -2182,40 +2190,28 @@ function initTransportControls() {
 
 
 
-// 重新计算所有区县的时间
-
-function recalculateAllTimes() {
-
-  for (const code in driveDataMap) {
-
-    const data = driveDataMap[code];
-
-    if (data.estimated) {
-
-      // 找到对应的 feature 获取坐标
-
-      const feature = allCountyFeatures.find(f => String(f?.properties?.adcode) === code);
-
-      if (feature) {
-
-        const center = feature?.properties?.centroid || feature?.properties?.center;
-
-        if (center) {
-
-          const est = estimateDriveTime(center[0], center[1], currentTransport);
-
-          data.time = est.time;
-
-          data.dist = est.dist;
-
-          data.transport = currentTransport;
-
-        }
-
-      }
-
-    }
-
+// 重新计算所有区县的时间
+function recalculateAllTimes() {
+  const isCar = currentTransport === 'car';
+
+  for (const code in driveDataMap) {
+    const data = driveDataMap[code];
+
+    // 非自驾模式：全部用估算值重新计算（因为 OSRM 数据只适用于自驾）
+    // 自驾模式：只有 estimated=true 的才需要重新计算（OSRM 缓存仍然有效）
+    if (!isCar || data.estimated) {
+      const feature = allCountyFeatures.find(f => String(f?.properties?.adcode) === code);
+      if (feature) {
+        const center = feature?.properties?.centroid || feature?.properties?.center;
+        if (center) {
+          const est = estimateDriveTime(center[0], center[1], currentTransport);
+          data.time = est.time;
+          data.dist = est.dist;
+          data.transport = currentTransport;
+          data.estimated = !isCar || data.estimated; // 非自驾模式标记为估算
+        }
+      }
+    }
   }
 
 }
