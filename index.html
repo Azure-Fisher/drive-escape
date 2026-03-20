@@ -372,45 +372,147 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     /* 图例 */
+
     .leaflet-control-zoom { display: none !important; }
+
     .legend {
+
       position: fixed;
+
       left: 12px;
+
       bottom: 24px;
+
       z-index: 1000;
-      width: 150px;
-      padding: 10px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      font-size: 10px;
+
+      width: 165px;
+
+      padding: 14px;
+
+      background: rgba(255,255,255,0.95);
+
+      backdrop-filter: blur(12px);
+
+      border-radius: 12px;
+
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+      font-size: 11px;
+
+      border: 1px solid rgba(0,0,0,0.06);
+
     }
-    .legend h3 { font-size: 12px; margin-bottom: 6px; }
-    .legend .item, .legend .band {
+
+    .legend-header {
+
       display: flex;
+
       align-items: center;
-      gap: 6px;
-      margin: 3px 0;
+
+      gap: 10px;
+
+      margin-bottom: 12px;
+
+      padding-bottom: 10px;
+
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+
     }
+
+    .legend-header .icon { font-size: 20px; }
+
+    .legend-header .info { flex: 1; }
+
+    .legend-header .title { font-weight: 700; font-size: 13px; color: #1c1c1c; }
+
+    .legend-header .desc { font-size: 10px; color: #666; margin-top: 1px; }
+
+    .legend h3 { font-size: 11px; margin-bottom: 8px; color: #444; }
+
+    .legend .item, .legend .band {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      margin: 4px 0;
+
+    }
+
     .legend .swatch {
-      width: 16px; height: 10px;
-      border: 1px solid rgba(0,0,0,0.2);
+
+      width: 20px; height: 12px;
+
+      border-radius: 2px;
+
       flex-shrink: 0;
+
     }
+
     .legend .line-swatch {
-      width: 16px; height: 0;
+
+      width: 20px; height: 0;
+
       flex-shrink: 0;
+
     }
+
     .legend .line-swatch.city { border-top: 2px solid #6b4c8a; }
+
     .legend .line-swatch.prov { border-top: 2px dashed #888; }
+
     .legend .line-swatch.origin { border-top: 3px solid #e88; }
+
     .legend .hatch {
-      width: 16px; height: 10px;
+
+      width: 20px; height: 12px;
+
       flex-shrink: 0;
-      border: 1px solid rgba(0,0,0,0.2);
+
+      border-radius: 2px;
+
       background: repeating-linear-gradient(45deg, #aa2211, #aa2211 3px, #fff 3px, #fff 6px);
+
+    }
+
+    .legend-divider {
+
+      height: 1px;
+
+      background: rgba(0,0,0,0.08);
+
+      margin: 10px 0;
+
+    }
+
+    .legend-filter label {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 8px;
+
+      cursor: pointer;
+
+      font-size: 11px;
+
+      color: #333;
+
+    }
+
+    .legend-filter input[type="checkbox"] {
+
+      width: 16px;
+
+      height: 16px;
+
+      accent-color: var(--theme-primary);
+
+      cursor: pointer;
+
     }
 
     /* 县区标签 */
@@ -752,17 +854,7 @@
 
   </div>
 
-  <div class="roundtrip-filter">
 
-    <label>
-
-      <input type="checkbox" id="roundtrip-filter" />
-
-      <span>仅往返≤8h</span>
-
-    </label>
-
-  </div>
 
   <div class="lang-switcher">
 
@@ -790,12 +882,41 @@
 </div>
 
 <aside class="legend">
-  <h3>图例</h3>
-  <div class="item"><span class="hatch"></span><span>出发点</span></div>
-  <div class="item"><span class="line-swatch origin"></span><span id="legend-origin">出发市</span></div>
-  <div class="item"><span class="line-swatch prov"></span><span>省界</span></div>
-  <div class="item"><span class="line-swatch city"></span><span>市界</span></div>
+
+  <div class="legend-header">
+
+    <span class="icon" id="legend-icon">🚗</span>
+
+    <div class="info">
+
+      <div class="title" id="legend-title">自驾模式</div>
+
+      <div class="desc" id="legend-desc">85km/h · 5小时可达</div>
+
+    </div>
+
+  </div>
+
   <div id="band-list"></div>
+
+  <div class="legend-divider"></div>
+
+  <div class="item"><span class="hatch"></span><span>出发点</span></div>
+
+  <div class="legend-divider"></div>
+
+  <div class="legend-filter">
+
+    <label>
+
+      <input type="checkbox" id="roundtrip-filter" />
+
+      <span>仅往返≤8小时</span>
+
+    </label>
+
+  </div>
+
 </aside>
 
 <div class="info-panel" id="info">
@@ -824,24 +945,23 @@ function syncSearchWidth() {
 }
 window.addEventListener('resize', syncSearchWidth);
 
-function applyLang() {
+function applyLang() {
+
   document.documentElement.lang = window.LANG?.code || 'zh-CN';
+
   const titleH1 = document.querySelector('.title-overlay h1');
   if (titleH1) titleH1.textContent = t('title');
   const searchInput = document.getElementById('city-search');
-  if (searchInput) searchInput.placeholder = t('searchPlaceholder');
-  document.querySelector('.legend h3').textContent = t('legend');
-  // legend items: origin, originCity, provinceBorder, cityBorder
-  const legendItems = document.querySelectorAll('.legend > .item');
-  if (legendItems[0]) legendItems[0].querySelector('span:last-child').textContent = t('origin');
-  if (legendItems[1]) legendItems[1].querySelector('span:last-child').textContent = t('originCity', { city: typeof currentCityName !== 'undefined' ? currentCityName : '' });
-  if (legendItems[2]) legendItems[2].querySelector('span:last-child').textContent = t('provinceBorder');
-  if (legendItems[3]) legendItems[3].querySelector('span:last-child').textContent = t('cityBorder');
-  // subtitle and page title
-  if (typeof currentCityName !== 'undefined') {
-    document.getElementById('title-sub').textContent = t('subtitle', { city: currentCityName });
-    document.title = t('pageTitle', { city: currentCityName });
-    document.getElementById('legend-origin').textContent = t('originCity', { city: currentCityName });
+  if (searchInput) searchInput.placeholder = t('searchPlaceholder');
+
+  // legend items
+  const legendItem = document.querySelector('.legend .item span:last-child');
+  if (legendItem) legendItem.textContent = t('origin');
+
+  // subtitle and page title
+  if (typeof currentCityName !== 'undefined') {
+    document.getElementById('title-sub').textContent = t('subtitle', { city: currentCityName });
+    document.title = t('pageTitle', { city: currentCityName });
   }
   // 同步搜索框宽度（手机端）
   requestAnimationFrame(syncSearchWidth);
@@ -1367,7 +1487,6 @@ async function searchCity(query) {
         searchResults.style.display = "none";
         // 立即同步更新标题和图例，不等 switchCity 内部流程
         document.getElementById("title-sub").textContent = t('subtitle', { city: name });
-        document.getElementById("legend-origin").textContent = t('originCity', { city: name });
         document.title = t('pageTitle', { city: name });
         showLoading(t('loading'));
         switchCity(name, lng, lat, cc);
@@ -1855,7 +1974,6 @@ async function switchCity(name, lng, lat, countryCode) {
 
   // 3. 更新标题
   document.getElementById("title-sub").textContent = t('subtitle', { city: name });
-  document.getElementById("legend-origin").textContent = t('originCity', { city: name });
   document.title = t('pageTitle', { city: name });
 
   // 4. loading
@@ -2295,8 +2413,6 @@ async function welcomeSelectCity(name) {
 
   document.getElementById("title-sub").textContent = t('subtitle', { city: name });
 
-  document.getElementById("legend-origin").textContent = t('originCity', { city: name });
-
   document.title = t('pageTitle', { city: name });
 
   updateURL(name);
@@ -2375,9 +2491,9 @@ const TRANSPORT_THEMES = {
 
   car: { primary: '#1a6e5c' },
 
-  train: { primary: '#2563eb' },
+  train: { primary: '#2563eb', name: '高铁', speed: '250km/h', icon: '🚄', desc: '含1小时进出站' },
 
-  bike: { primary: '#ea580c' }
+  bike: { primary: '#ea580c', name: '骑行', speed: '15km/h', icon: '🚴', desc: '' }
 
 };
 
@@ -2390,6 +2506,20 @@ function updateTheme(transport) {
   if (theme) {
 
     document.documentElement.style.setProperty('--theme-primary', theme.primary);
+
+    // 更新图例
+
+    const legendIcon = document.getElementById('legend-icon');
+
+    const legendTitle = document.getElementById('legend-title');
+
+    const legendDesc = document.getElementById('legend-desc');
+
+    if (legendIcon) legendIcon.textContent = theme.icon;
+
+    if (legendTitle) legendTitle.textContent = theme.name + '模式';
+
+    if (legendDesc) legendDesc.textContent = theme.speed + ' · 5小时可达' + (theme.desc ? '（' + theme.desc + '）' : '');
 
   }
 
@@ -2539,7 +2669,6 @@ function recalculateAllTimes() {
     dismissWelcome();
     showLoading(t('loading'));
     document.getElementById("title-sub").textContent = t('subtitle', { city: urlCity });
-    document.getElementById("legend-origin").textContent = t('originCity', { city: urlCity });
     document.title = t('pageTitle', { city: urlCity });
     searchInput.value = urlCity;
 
