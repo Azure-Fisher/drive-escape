@@ -1,10 +1,11 @@
 window.LANG = {
   code: 'zh-TW',
   label: '繁體中文',
-  title: '週末自駕逃離計畫',
-  titleEn: 'Weekend Self-Driving Escape Plan',
+  title: '週末逃離計畫',
+
+  titleEn: 'Weekend Escape Plan',
   subtitle: '{city} · 耗時&距離',
-  searchPlaceholder: '搜尋出發城市...',
+  searchPlaceholder: '搜尋城市或地址...',
   loading: '正在載入區劃資料...',
   loadingDriveTime: '正在最佳化行車時間 ({done}/{total})...',
   loadingOverseas: '正在載入海外區劃資料...',
@@ -18,11 +19,11 @@ window.LANG = {
   originLabel: '出發地',
   timeUnit: '小時',
   estimated: '(估算)',
-  pageTitle: '週末自駕逃離計畫 - {city}版',
+  pageTitle: '週末逃離計畫',
   noResult: '無結果',
   searchFailed: '搜尋失敗',
-  welcomeHeadline: '週末自駕逃離計畫',
-  welcomeSub: '輸入出發城市，探索你的自駕逃離範圍',
+  welcomeHeadline: '週末逃離計畫',
+  welcomeSub: '輸入出發城市，探索你的逃離範圍',
   welcomeQuickLabel: '熱門城市',
   welcomeCities: ['台北', '台中', '高雄']
 };
