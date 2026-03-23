@@ -6,7 +6,7 @@
 
 **作者** → [@benshandebiao](https://x.com/benshandebiao)
 
-🌐 [简体中文](./README.md) | [English](./README_EN.md) | [日本語](./README_JA.md)
+🌐 [简体中文](./README_ZH.md) | [English](./README_EN.md) | [日本語](./README_JA.md)
 
 ## 功能
 
