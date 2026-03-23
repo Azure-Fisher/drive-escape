@@ -330,15 +330,17 @@
 
     }
 
-    #search-results {
-      margin-top: 4px;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      overflow: hidden;
-      display: none;
+    #search-results {
+      margin-top: 4px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      overflow: hidden;
+      display: none;
+      position: relative;
+      z-index: 1010;
     }
     #search-results .result-item {
       padding: 8px 14px;
@@ -483,17 +485,27 @@
 
       .title-overlay {
 
+
+
         top: 8px;
 
-        left: 10px;
+
 
         padding: 6px 12px;
 
+
+
         max-width: calc(100vw - 100px);
+
+
 
         white-space: normal;
 
+
+
         width: auto;
+
+
 
       }
 
@@ -885,25 +897,44 @@
       top: 16px;
       right: 16px;
     }
-    @media (max-width: 520px) {
-      .welcome-card { padding: 28px 20px 24px; }
-      .welcome-headline { font-size: 20px; }
-      .welcome-sub { font-size: 14px; }
-      .welcome-search-wrap input { height: 48px; font-size: 15px; }
-      .welcome-city-tag { padding: 5px 12px; font-size: 12px; }
-    }
-
-    /* 小屏幕手机 */
-    @media (max-width: 380px) {
-      .title-overlay h1 { font-size: 14px; }
-      .title-overlay .sub { font-size: 10px; }
-      .top-controls .search-box { top: 48px; }
-      .top-controls .transport-switcher,
-      .top-controls .roundtrip-filter { top: 92px; }
-      .transport-switcher select,
-      .roundtrip-filter { font-size: 10px; height: 34px; }
-      .legend { width: 80px; font-size: 7px; }
-      .legend h3 { font-size: 8px; }
+    @media (max-width: 520px) {
+
+      .welcome-card { padding: 28px 20px 24px; }
+
+      .welcome-headline { font-size: 20px; }
+
+      .welcome-sub { font-size: 14px; }
+
+      .welcome-search-wrap input { height: 48px; font-size: 15px; }
+
+      .welcome-city-tag { padding: 5px 12px; font-size: 12px; }
+
+    }
+
+
+
+    /* 小屏幕手机 */
+
+    @media (max-width: 380px) {
+
+      .title-overlay h1 { font-size: 14px; }
+
+      .title-overlay .sub { font-size: 10px; }
+
+      .top-controls .search-box { top: 48px; }
+
+      .top-controls .transport-switcher,
+
+      .top-controls .roundtrip-filter { top: 92px; }
+
+      .transport-switcher select,
+
+      .roundtrip-filter { font-size: 10px; height: 34px; }
+
+      .legend { width: 80px; font-size: 7px; }
+
+      .legend h3 { font-size: 8px; }
+
     }
   </style>
 </head>
@@ -2090,7 +2121,12 @@ async function switchCity(name, lng, lat, countryCode) {
   showLoading(t('loading'));
 
   // 5. 判断是否在中国范围内
+
   const isChina = countryCode === 'cn' || (!countryCode && lat > 17 && lat < 55 && lng > 73 && lng < 136);
+
+  const isJapan = countryCode === 'jp';
+
+
 
   allCountyFeatures = [];
   allGrayFeatures = [];
@@ -2137,11 +2173,13 @@ async function switchCity(name, lng, lat, countryCode) {
       }
     }
   } else {
+
     // 海外：用 Overpass API 获取行政边界
+
     showLoading(t('loadingOverseas'));
 
-    // 根据国家选择合适的行政级别
-    const isJapan = countryCode === 'jp';
+
+
     // 欧洲国家列表（level 8 = 市/区/镇，统一处理）
     const EUROPE_CODES = new Set(['gb','fr','de','it','es','pt','nl','be','at','ch','pl','cz','se','no','dk','fi','ie','hu','ro','bg','hr','sk','si','lt','lv','ee','lu','gr']);
     const isEurope = EUROPE_CODES.has(countryCode);
