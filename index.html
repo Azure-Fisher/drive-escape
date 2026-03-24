@@ -1659,38 +1659,51 @@ const CORS_PROXIES = [
 ];
 let currentProxyIndex = 0;
 
-function geoURL(code) {
-  // 优先使用本地代理（Cloudflare Function）
-  if (window.location.hostname !== 'localhost' && window.location.protocol !== 'file:') {
-    return `/api/geo?code=${code}`;
-  }
-  // 本地开发：直接访问阿里云（配合 CORS 代理）
-  return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
+function geoURL(code) {
+
+  // 优先使用本地代理（Cloudflare Function）
+
+  if (window.location.hostname !== 'localhost' && window.location.protocol !== 'file:') {
+
+    return `/api/geo?code=${code}`;
+
+  }
+
+  // 本地开发：直接访问阿里云（配合 CORS 代理）
+
+  return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
+
 }
 
-async function fetchJSON(url, timeoutMs = 15000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  // 尝试直接请求
-  try {
-    const r = await fetch(url, {
-      signal: controller.signal,
-      mode: 'cors',
-      headers: { 'Accept': 'application/json' }
-    });
-    clearTimeout(timer);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  } catch(e) {
-    clearTimeout(timer);
-    // CORS 错误：尝试代理
-    if (e.name === 'TypeError' && e.message.includes('fetch')) {
-      console.warn('Direct fetch failed, trying CORS proxy...');
-      return fetchWithProxy(url, timeoutMs);
-    }
-    throw e;
-  }
+async function fetchJSON(url, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  // 判断是否是本地代理路径
+  const isProxyUrl = url.startsWith('/api/');
+
+  try {
+    const options = {
+      signal: controller.signal,
+      headers: { 'Accept': 'application/json' }
+    };
+    // 只有非代理路径才需要 CORS 模式
+    if (!isProxyUrl) {
+      options.mode = 'cors';
+    }
+    const r = await fetch(url, options);
+    clearTimeout(timer);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  } catch(e) {
+    clearTimeout(timer);
+    // 只有非代理 URL 才尝试 CORS 代理
+    if (!isProxyUrl && e.name === 'TypeError') {
+      console.warn('Direct fetch failed, trying CORS proxy...');
+      return fetchWithProxy(url, timeoutMs);
+    }
+    throw e;
+  }
 }
 
 async function fetchWithProxy(url, timeoutMs = 15000) {
