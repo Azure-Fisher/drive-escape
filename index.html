@@ -493,291 +493,74 @@
     .leaflet-control-attribution { font-size: 9px !important; }
     /* 移动端适配 — 保持 PC 版风格，只缩小 */
     @media (max-width: 640px) {
-
       .title-overlay {
-
-
-
         top: 8px;
-
-
-
         padding: 6px 12px;
-
-
-
         max-width: calc(100vw - 100px);
-
-
-
         white-space: normal;
-
-
-
         width: auto;
-
-
-
       }
-
       .title-overlay .en { font-size: 8px; }
-
       .title-overlay h1 { font-size: 16px; }
-
       .title-overlay .sub { font-size: 11px; }
 
-
-
       .top-controls {
-
-        top: auto;
-
-        right: auto;
-
-        left: auto;
-
-        display: contents;
-
+        position: fixed;
+        top: 50px;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        z-index: 1001;
       }
 
-
-
-      /* 语言切换器 - 右上角 */
-
+      /* 语言切换器 - 右上角固定 */
       .top-controls .lang-switcher {
-
         position: fixed;
-
-        top: 10px;
-
+        top: 8px;
         right: 10px;
-
         z-index: 1002;
-
       }
-
       .lang-switcher select {
-
-        padding: 8px 28px 8px 10px;
-
-        font-size: 12px;
-
-        height: 36px;
-
-      }
-
-
-
-      /* 搜索框 - 左侧，和标题对齐 */
-
-      .top-controls .search-box {
-
-
-
-        position: fixed;
-
-
-
-        top: 52px;
-
-
-
-        left: 10px;
-
-
-
-        width: calc(50% - 20px);
-
-
-
-        z-index: 1001;
-
-
-
-      }
-
-
-
-      .top-controls input[type="text"] {
-
-
-
-        width: 100%;
-
-
-
-        height: 36px;
-
-
-
-        padding: 0 12px;
-
-
-
-        font-size: 13px;
-
-
-
-      }
-
-
-
-      /* 交通方式 - 右侧，搜索框同一行 */
-
-
-
-      .top-controls .transport-switcher {
-
-
-
-        position: fixed;
-
-
-
-        top: 52px;
-
-
-
-        right: 10px;
-
-
-
-        z-index: 1001;
-
-
-
-      }
-
-      .transport-switcher select {
-
-        padding: 8px 28px 8px 10px;
-
-        font-size: 12px;
-
-        height: 36px;
-
-      }
-
-
-
-      /* 往返筛选 - 右侧，交通方式左边 */
-
-
-
-      .top-controls .roundtrip-filter {
-
-
-
-        position: fixed;
-
-
-
-        top: 52px;
-
-
-
-        right: auto;
-
-
-
-        left: calc(50% + 5px);
-
-
-
-        z-index: 1001;
-
-        padding: 8px 10px;
-
+        height: 34px;
+        padding: 6px 24px 6px 8px;
         font-size: 11px;
-
-        height: 36px;
-
       }
 
+      /* 搜索框 - 左侧自适应宽度 */
+      .top-controls .search-box {
+        flex: 1;
+        min-width: 0;
+      }
+      .top-controls input[type="text"] {
+        width: 100%;
+        height: 34px;
+        padding: 0 12px;
+        font-size: 13px;
+      }
+
+      /* 交通方式 */
+      .top-controls .transport-switcher {
+        flex-shrink: 0;
+      }
+      .transport-switcher select {
+        height: 34px;
+        padding: 6px 24px 6px 8px;
+        font-size: 11px;
+      }
+
+      /* 往返筛选 */
+      .top-controls .roundtrip-filter {
+        flex-shrink: 0;
+        height: 34px;
+        padding: 0 8px;
+        font-size: 10px;
+      }
       .roundtrip-filter input[type="checkbox"] {
-
-        width: 16px;
-
-        height: 16px;
-
+        width: 14px;
+        height: 14px;
       }
-
-
-
-      #search-results {
-
-        max-height: 250px;
-
-        left: 10px;
-
-        right: 10px;
-
-        width: auto;
-
-      }
-
-
-
-      /* 图例 - 稍微放大 */
-
-      .legend {
-
-        left: 8px;
-
-        bottom: 12px;
-
-        width: 90px;
-
-        padding: 6px;
-
-        font-size: 8px;
-
-      }
-
-      .legend h3 { font-size: 9px; margin-bottom: 4px; }
-
-      .legend .item, .legend .band { gap: 4px; margin: 2px 0; }
-
-      .legend .swatch { width: 12px; height: 7px; }
-
-      .legend .line-swatch { width: 12px; }
-
-      .legend .hatch { width: 12px; height: 7px; }
-
-
-
-      /* 信息面板 - 底部居中 */
-
-      .info-panel {
-
-        left: 50%;
-
-        right: auto;
-
-        bottom: 12px;
-
-        transform: translateX(-50%);
-
-        max-width: calc(100vw - 20px);
-
-        padding: 10px 14px;
-
-        font-size: 12px;
-
-      }
-
-
-
-      .loading-overlay { bottom: 12px; }
-
-      .loading-box { font-size: 12px; padding: 6px 14px; }
-
-    }
-
-
-
-    /* 平板断点 */
-
     @media (min-width: 641px) and (max-width: 1024px) {
 
       .title-overlay {
@@ -1723,82 +1506,158 @@ function geoURL(code) {
 
 }
 
-async function fetchJSON(url, timeoutMs = 15000) {
-
-  const controller = new AbortController();
-
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-
-
-  // 判断是否是本地代理路径
-
-  const isProxyUrl = url.startsWith('/api/');
-
-
-
-  try {
-
-    const options = {
-
-      signal: controller.signal,
-
-      headers: { 'Accept': 'application/json' }
-
-    };
-
-    // 只有非代理路径才需要 CORS 模式
-
-    if (!isProxyUrl) {
-
-      options.mode = 'cors';
-
-    }
-
-    const r = await fetch(url, options);
-
-    clearTimeout(timer);
-
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-
-    return r.json();
-
-  } catch(e) {
-
-    clearTimeout(timer);
-
-    // 代理 URL 失败时，回退到直接访问阿里云 API
-
-    if (isProxyUrl) {
-
-      const codeMatch = url.match(/code=(\d+)/);
-
-      if (codeMatch) {
-
-        const directUrl = `https://geo.datav.aliyun.com/areas_v3/bound/${codeMatch[1]}_full.json`;
-
-        console.warn(`Proxy failed, trying direct access: ${directUrl}`);
-
-        return fetchWithProxy(directUrl, timeoutMs);
-
-      }
-
-    }
-
-    // 非代理 URL 失败时尝试 CORS 代理
-
-    if (e.name === 'TypeError') {
-
-      console.warn('Direct fetch failed, trying CORS proxy...');
-
-      return fetchWithProxy(url, timeoutMs);
-
-    }
-
-    throw e;
-
-  }
-
+async function fetchJSON(url, timeoutMs = 15000) {
+
+
+
+  const controller = new AbortController();
+
+
+
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+
+
+
+
+
+
+  // 判断是否是本地代理路径
+
+
+
+  const isProxyUrl = url.startsWith('/api/');
+
+
+
+
+
+
+
+  try {
+
+
+
+    const options = {
+
+
+
+      signal: controller.signal,
+
+
+
+      headers: { 'Accept': 'application/json' }
+
+
+
+    };
+
+
+
+    // 只有非代理路径才需要 CORS 模式
+
+
+
+    if (!isProxyUrl) {
+
+
+
+      options.mode = 'cors';
+
+
+
+    }
+
+
+
+    const r = await fetch(url, options);
+
+
+
+    clearTimeout(timer);
+
+
+
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+
+
+    return r.json();
+
+
+
+  } catch(e) {
+
+
+
+    clearTimeout(timer);
+
+
+
+    // 代理 URL 失败时，回退到直接访问阿里云 API
+
+
+
+    if (isProxyUrl) {
+
+
+
+      const codeMatch = url.match(/code=(\d+)/);
+
+
+
+      if (codeMatch) {
+
+
+
+        const directUrl = `https://geo.datav.aliyun.com/areas_v3/bound/${codeMatch[1]}_full.json`;
+
+
+
+        console.warn(`Proxy failed, trying direct access: ${directUrl}`);
+
+
+
+        return fetchWithProxy(directUrl, timeoutMs);
+
+
+
+      }
+
+
+
+    }
+
+
+
+    // 非代理 URL 失败时尝试 CORS 代理
+
+
+
+    if (e.name === 'TypeError') {
+
+
+
+      console.warn('Direct fetch failed, trying CORS proxy...');
+
+
+
+      return fetchWithProxy(url, timeoutMs);
+
+
+
+    }
+
+
+
+    throw e;
+
+
+
+  }
+
+
+
 }
 
 async function fetchWithProxy(url, timeoutMs = 15000) {
