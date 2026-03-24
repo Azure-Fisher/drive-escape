@@ -4,19 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>周末逃离计划</title>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7R2BCNPBSP"></script>
+  <!-- Google Analytics - 条件加载，不影响国内用户 -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-7R2BCNPBSP');
+  (function(){
+    var tested = false;
+    function loadGA(){
+      if(tested) return;
+      tested = true;
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-7R2BCNPBSP';
+      s.onload = function(){
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function(){dataLayer.push(arguments);};
+        gtag('js', new Date());
+        gtag('config', 'G-7R2BCNPBSP');
+      };
+      document.head.appendChild(s);
+    }
+    var img = new Image();
+    img.onload = loadGA;
+    img.src = 'https://www.google.com/favicon.ico?' + Date.now();
+    setTimeout(loadGA, 3000);
+  })();
   </script>
   <script src="lang/zh-CN.js?v=2" id="lang-script"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="preconnect" href="https://fonts.loli.net" />
+  <link rel="preconnect" href="https://gstatic.loli.net" crossorigin />
+  <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1112,7 +1128,7 @@
   <div id="info-detail"></div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
 // ── i18n ──
 const LANG_FILES = { 'zh-CN': 'lang/zh-CN.js', 'zh-TW': 'lang/zh-TW.js', en: 'lang/en.js', ja: 'lang/ja.js' };
@@ -1401,11 +1417,34 @@ const map = L.map("map", {
 
 
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-  maxZoom: 18,
-  opacity: 0.3
-}).addTo(map);
+// 地图瓦片：国内优先，海外 fallback
+(function(){
+  var providers = [
+    { url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', subdomains: '1234', attr: '高德地图' },
+    { url: 'https://map.geoq.cn/ArcGIS/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}', subdomains: '', attr: 'GeoQ' },
+    { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', subdomains: 'abc', attr: 'OpenStreetMap' }
+  ];
+  var idx = 0;
+  var layer = null;
+  function tryLayer(){
+    var p = providers[idx];
+    layer = L.tileLayer(p.url, {
+      subdomains: p.subdomains,
+      attribution: '&copy; ' + p.attr,
+      maxZoom: 18,
+      opacity: 0.3
+    });
+    layer.on('tileerror', function(){
+      if(idx < providers.length - 1){
+        idx++;
+        map.removeLayer(layer);
+        tryLayer();
+      }
+    });
+    layer.addTo(map);
+  }
+  tryLayer();
+})();
 
 // ── 全局状态 ──
 let currentOrigin = [120.15, 30.26]; // [lng, lat]
