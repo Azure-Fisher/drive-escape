@@ -1503,21 +1503,32 @@ document.addEventListener("click", e => {
 });
 
 // ── 数据加载 ──
-// DataV 代理：线上走 /api/geo 代理（避免 CORS/403），本地直连
+// DataV 直连地址
+const DATAV_BASE = 'https://geo.datav.aliyun.com/areas_v3/bound';
+
+// 判断是否使用代理
+function useProxy() {
+  return location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
+}
+
+// 获取 GeoJSON 直连 URL
 function geoURL(code) {
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
-  }
+  return `${DATAV_BASE}/${code}_full.json`;
+}
+
+// 获取代理 URL
+function proxyURL(code) {
   return `/api/geo?code=${code}`;
 }
 
+// 带超时的 JSON 获取
 async function fetchJSON(url, timeoutMs = 8000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const r = await fetch(url, { signal: controller.signal });
     clearTimeout(timer);
-    if (!r.ok) throw new Error(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
   } catch(e) {
     clearTimeout(timer);
@@ -1525,7 +1536,30 @@ async function fetchJSON(url, timeoutMs = 8000) {
   }
 }
 
-// 并发控制：最多同时 N 个请求
+// 带降级的 GeoJSON 获取（代理失败时尝试直连）
+async function fetchGeoJSON(code, timeoutMs = 10000) {
+  // 本地开发：直连
+  if (!useProxy()) {
+    return fetchJSON(geoURL(code), timeoutMs);
+  }
+  
+  // 线上：先尝试代理，失败则降级直连
+  try {
+    return await fetchJSON(proxyURL(code), timeoutMs);
+  } catch (proxyError) {
+    console.warn(`代理请求失败 (code=${code})，尝试直连...`, proxyError.message);
+    try {
+      const data = await fetchJSON(geoURL(code), timeoutMs);
+      console.log(`直连成功 (code=${code})`);
+      return data;
+    } catch (directError) {
+      console.error(`直连也失败了 (code=${code})`, directError.message);
+      throw directError;
+    }
+  }
+}
+
+// // 并发控制：最多同时 N 个请求
 async function parallelLimit(tasks, limit = 5) {
   const results = [];
   let i = 0;
@@ -1545,7 +1579,7 @@ const DIRECT_MUNICIPALITIES = new Set([110000, 120000, 310000, 500000]);
 
 async function loadProvinceCounties(provAdcode) {
   try {
-    const json = await fetchJSON(geoURL(provAdcode));
+    const json = await fetchGeoJSON(provAdcode);
     const features = json.features || [];
     const provOutline = features.find(f => Number(f?.properties?.adcode) === provAdcode) || null;
     const cities = features.filter(f => Number(f?.properties?.adcode || 0) !== provAdcode);
@@ -1562,7 +1596,7 @@ async function loadProvinceCounties(provAdcode) {
     const cityTasks = cities.map(city => async () => {
       const cityCode = Number(city?.properties?.adcode);
       try {
-        const cj = await fetchJSON(geoURL(cityCode));
+        const cj = await fetchGeoJSON(cityCode);
         const counties = (cj.features || []).filter(f => {
           const parent = Number(f?.properties?.parent?.adcode || 0);
           return parent === cityCode;
@@ -1583,7 +1617,7 @@ async function loadProvinceCounties(provAdcode) {
 // 加载省级轮廓（市级，不展开区县）
 async function loadProvinceCities(provAdcode) {
   try {
-    const json = await fetchJSON(geoURL(provAdcode));
+    const json = await fetchGeoJSON(provAdcode);
     const features = json.features || [];
     const provOutline = features.find(f => Number(f?.properties?.adcode) === provAdcode) || null;
     const cities = features.filter(f => Number(f?.properties?.adcode || 0) !== provAdcode);
