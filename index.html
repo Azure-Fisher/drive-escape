@@ -391,19 +391,6 @@
         left: auto;
         display: contents;
       }
-      .top-controls .search-box {
-        position: fixed;
-        top: 68px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 180px;
-        z-index: 1001;
-      }
-      .top-controls input[type="text"] {
-        width: 100%;
-        padding: 7px 12px;
-        font-size: 13px;
-      }
       .top-controls .lang-switcher {
         position: fixed;
         top: 12px;
@@ -414,43 +401,18 @@
         padding: 6px 24px 6px 8px;
         font-size: 11px;
       }
-      #search-results { max-height: 200px; }
 
-      .legend {
-        left: 6px;
-        bottom: 10px;
-        width: 80px;
-        padding: 5px;
-        font-size: 7px;
-      }
-      .legend h3 { font-size: 8px; margin-bottom: 3px; }
-      .legend .item, .legend .band { gap: 3px; margin: 1px 0; }
-      .legend .swatch { width: 10px; height: 6px; }
-      .legend .line-swatch { width: 10px; }
-      .legend .hatch { width: 10px; height: 6px; }
-
-      .info-panel {
-        right: 8px;
-        bottom: 50px;
-        max-width: 160px;
-        padding: 8px 10px;
-        font-size: 11px;
-      }
-
-
-
-.loading-overlay { bottom: 10px; }
-      .loading-box { font-size: 11px; padding: 5px 12px; }
-
-      /* 出行方式选择器移动端适配 - 放在标题下方左侧 */
+      /* 出行方式选择器 - 左侧 */
       .transport-mode {
+        position: fixed;
         top: 56px;
         left: 8px;
+        z-index: 1001;
       }
       .transport-mode select {
         padding: 6px 8px;
         font-size: 11px;
-        min-width: 90px;
+        min-width: 85px;
       }
       .round-trip-indicator {
         top: 88px;
@@ -459,35 +421,38 @@
         padding: 4px 8px;
       }
 
-      /* 搜索框移到右侧，与出行方式对称 */
+      /* 搜索框 - 右侧 */
       .top-controls .search-box {
+        position: fixed;
         top: 56px;
         left: auto;
         right: 8px;
         transform: none;
-        width: 140px;
+        width: calc(50vw - 16px);
+        max-width: 150px;
+        min-width: 100px;
+        z-index: 1001;
       }
       .top-controls input[type="text"] {
+        width: 100%;
         padding: 6px 10px;
         font-size: 12px;
       }
-
-      /* 搜索结果下拉 */
       #search-results {
         position: fixed;
-        top: auto;
-        bottom: auto;
+        top: 84px;
         left: auto;
         right: 8px;
-        width: 140px;
-        max-height: 180px;
+        width: calc(50vw - 16px);
+        max-width: 150px;
+        min-width: 100px;
+        max-height: 200px;
       }
 
-      /* 图例缩小并上移，避免被搜索结果遮挡 */
       .legend {
         left: 6px;
         bottom: 60px;
-        width: 72px;
+        width: 70px;
         padding: 4px;
         font-size: 7px;
       }
@@ -497,7 +462,6 @@
       .legend .line-swatch { width: 8px; }
       .legend .hatch { width: 8px; height: 5px; }
 
-      /* 信息面板上移 */
       .info-panel {
         right: 6px;
         bottom: 60px;
@@ -505,9 +469,19 @@
         padding: 6px 8px;
         font-size: 10px;
       }
+
+      .loading-overlay { bottom: 10px; }
+      .loading-box { font-size: 11px; padding: 5px 12px; }
     }
 
-    /* ── 欢迎屏 ── */      align-items: center;
+    /* ── 欢迎屏 ── */
+    #welcome-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: #e8e4d8;
+      display: flex;
+      align-items: center;
       justify-content: center;
       transition: opacity 0.5s ease;
     }
