@@ -1,8 +1,8 @@
-# 🚗 Drive Escape — Weekend Self-Driving Map
+# 🚗 Drive Escape — 周末出行地图
 
-Pick a city, see how far you can drive in 5 hours.
+选择城市，看看你能走多远。
 
-**Live Demo** → [drive-escape.pomodiary.com](https://drive-escape.pomodiary.com)
+**Forked from** → [qiaoshouqing/drive-escape](https://github.com/qiaoshouqing/drive-escape)
 
 **Author** → [@benshandebiao](https://x.com/benshandebiao)
 
@@ -10,43 +10,61 @@ Pick a city, see how far you can drive in 5 hours.
 
 ---
 
-## Features
+## ✨ 功能特性
 
-- 🔍 Search any city worldwide — instantly generates a driving time heatmap
-- 🗺️ District-level boundaries with 10-tier color scale (green → red)
-- 🏷️ Each district labeled with name, drive time, and distance
-- ⏱️ Real driving time via OSRM + local cache for instant reload
-- 🌏 International support (Japan, Europe, Australia, Taiwan, and more)
-- 📱 Mobile friendly, multi-language (EN / 简体 / 繁體 / 日本語)
+- 🔍 搜索全球任意城市，即时生成出行时间热力图
+- 🗺️ 区县级别边界，10 级色阶（绿 → 红）
+- 🏷️ 每个区县标注名称、时间、距离
+- ⏱️ 真实出行时间计算 + 本地缓存秒开
+- 🌏 国际支持（日本、欧洲、澳洲、台湾等）
+- 📱 移动端友好，多语言支持
 
-## Tech Stack
+## 🚀 多种出行方式
 
-| Component | Solution |
-|-----------|----------|
-| Map rendering | Leaflet + OpenStreetMap |
-| China boundaries | DataV GeoJSON API |
-| International boundaries | Overpass API |
-| Driving time | OSRM Table API |
-| City search | Nominatim API |
-| Hosting | Cloudflare Pages + Functions |
+| 方式 | 时长 | 计算方式 |
+|------|------|----------|
+| 🚗 自驾 | 5 小时 | OSRM 道路时间 |
+| 🏍️ 摩托车 | 4 小时 | 道路时间 × 1.2 |
+| 🚄 高铁 | 5 小时 | 直线距离 / 250km/h + 1h 出入站 |
+| 🚇 地铁 | 3 小时 | 仅限有地铁城市 |
+| 🚲 自行车 | 4 小时 | 15km/h + 每小时 15 分钟休息 |
+| 🔄 往返 | 单程 4 小时 | 自驾往返模式 |
 
-No paid APIs. Fully open source.
+## 🛠️ 技术栈
 
-## Run Locally
+| 组件 | 方案 |
+|------|------|
+| 地图渲染 | Leaflet + OpenStreetMap |
+| 中国边界 | DataV GeoJSON API |
+| 国际边界 | Overpass API |
+| 驾车时间 | OSRM Table API |
+| 城市搜索 | Nominatim API |
+| 托管 | Cloudflare Pages + Functions |
+
+零付费 API，完全开源。
+
+## 📦 本地运行
 
 ```bash
-git clone https://github.com/qiaoshouqing/drive-escape.git
+git clone https://github.com/Azure-Fisher/drive-escape.git
 cd drive-escape
 python3 -m http.server 8080
-# open http://localhost:8080
+# 打开 http://localhost:8080
 ```
 
-## Deploy
+## 🚀 部署
 
 ```bash
 wrangler pages deploy . --project-name drive-escape
 ```
 
-## License
+## 📋 版本记录
+
+| 版本 | Commit | 说明 |
+|------|--------|------|
+| v1.1 | `8f1cf9b` | 多出行方式 + 代理降级机制 |
+| v1.0 | 原版 | 基础自驾功能 |
+
+## 📄 许可证
 
 MIT
