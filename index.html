@@ -92,7 +92,118 @@
     .search-box input::placeholder { color: #aaa; }
     .search-box input:focus { box-shadow: 0 4px 20px rgba(0,0,0,0.18); }
 
+    /* 出行方式选择器 */
+
+    .transport-mode {
+
+      position: fixed;
+
+      top: 12px;
+
+      left: 16px;
+
+      z-index: 1001;
+
+    }
+
+    .transport-mode select {
+
+      padding: 8px 12px;
+
+      border: none;
+
+      border-radius: 10px;
+
+      background: rgba(255,255,255,0.92);
+
+      backdrop-filter: blur(8px);
+
+      -webkit-backdrop-filter: blur(8px);
+
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
+      font-size: 13px;
+
+      outline: none;
+
+      font-family: system-ui, -apple-system, sans-serif;
+
+      cursor: pointer;
+
+      color: #333;
+
+      -webkit-appearance: none;
+
+      appearance: none;
+
+      padding-right: 26px;
+
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+
+      background-repeat: no-repeat;
+
+      background-position: right 10px center;
+
+      min-width: 120px;
+
+    }
+
+    .transport-mode select option:disabled {
+
+      color: #aaa;
+
+      font-style: italic;
+
+    }
+
+    .transport-mode .mode-icon {
+
+      margin-right: 4px;
+
+    }
+
+
+
+    /* 往返模式指示 */
+
+    .round-trip-indicator {
+
+      position: fixed;
+
+      top: 50px;
+
+      left: 16px;
+
+      z-index: 1001;
+
+      background: rgba(26,110,92,0.92);
+
+      color: white;
+
+      padding: 6px 12px;
+
+      border-radius: 8px;
+
+      font-size: 12px;
+
+      font-weight: 600;
+
+      display: none;
+
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+
+    }
+
+    .round-trip-indicator.active {
+
+      display: block;
+
+    }
+
+
+
     /* 语言切换器 */
+
     .lang-switcher select {
       padding: 8px 10px;
       border: none;
@@ -328,8 +439,25 @@
 
 
 
-      .loading-overlay { bottom: 10px; }
-      .loading-box { font-size: 11px; padding: 5px 12px; }
+      .loading-overlay { bottom: 10px; }
+      .loading-box { font-size: 11px; padding: 5px 12px; }
+
+      /* 出行方式选择器移动端适配 */
+      .transport-mode {
+        top: 68px;
+        left: 10px;
+      }
+      .transport-mode select {
+        padding: 6px 10px;
+        font-size: 11px;
+        min-width: 100px;
+      }
+      .round-trip-indicator {
+        top: 100px;
+        left: 10px;
+        font-size: 10px;
+        padding: 4px 8px;
+      }
     }
 
     /* ── 欢迎屏 ── */
@@ -506,6 +634,34 @@
 
 <div id="map"></div>
 
+
+
+<!-- 出行方式选择器 -->
+
+<div class="transport-mode">
+
+  <select id="transport-select">
+
+    <option value="car">🚗 自驾 (5小时)</option>
+
+    <option value="motorcycle">🏍️ 摩托车 (4小时)</option>
+
+    <option value="highspeed">🚄 高铁 (5小时)</option>
+
+    <option value="metro" id="metro-option" disabled>🚇 地铁 (3小时)</option>
+
+    <option value="bicycle">🚲 自行车 (4小时)</option>
+
+    <option value="roundtrip">🔄 往返 (自驾8小时)</option>
+
+  </select>
+
+</div>
+
+<div class="round-trip-indicator" id="round-trip-indicator">往返模式：单程4小时</div>
+
+
+
 <div class="title-overlay" id="title-overlay-card">
   <div class="title-text">
     <div class="en">Weekend Self-Driving Escape Plan</div>
@@ -674,7 +830,7 @@ const colorBands = [
   { min: 4.5, max: 5.0, color: "#aa2211", label: "4.5–5h" }
 ];
 
-const MAX_DRIVE_HOURS = 5.0; // 超过此时间的区县不显示
+const MAX_DRIVE_HOURS_DEFAULT = 5.0; // 默认值，实际使用 getMaxHours()
 const MAX_STRAIGHT_KM = 400; // 直线距离上限，防止飞地
 
 // ── 34 个省级行政区 ──
@@ -755,18 +911,138 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 // ── 全局状态 ──
+
 let currentOrigin = [120.15, 30.26]; // [lng, lat]
+
 let currentCityName = "杭州";
+
 let originAdcode = null;
+
 let driveDataMap = {};       // adcode → { name, time, dist, isOrigin, estimated }
+
 let allCountyFeatures = [];
+
 let allGrayFeatures = [];
+
 let allCityOutlines = [];
+
 let allGrayCityOutlines = [];
+
 let labelLayer = L.layerGroup().addTo(map);
 
+
+
 // 需要在 switchCity 中清除的图层
+
 let activeLayers = [];
+
+
+
+// ── 出行方式配置 ──
+
+let currentTransportMode = 'car'; // 当前出行方式
+
+let metroCitiesData = null;       // 地铁城市数据
+
+let railwayStationsData = null;   // 高铁站点数据
+
+
+
+// 出行方式配置表
+
+const TRANSPORT_CONFIG = {
+
+  car: {
+
+    maxHours: 5.0,
+
+    speedFactor: 1.0,        // 相对汽车速度
+
+    label: '自驾',
+
+    useOSRM: true,
+
+    icon: '🚗'
+
+  },
+
+  motorcycle: {
+
+    maxHours: 4.0,
+
+    speedFactor: 1.2,        // 摩托车约为汽车速度的80%，所以时间×1.2
+
+    label: '摩托车',
+
+    useOSRM: true,
+
+    icon: '🏍️'
+
+  },
+
+  highspeed: {
+
+    maxHours: 5.0,
+
+    avgSpeed: 250,           // 高铁平均时速 km/h
+
+    entryExitTime: 1.0,      // 出入站时间（小时）
+
+    label: '高铁',
+
+    useOSRM: false,
+
+    icon: '🚄'
+
+  },
+
+  metro: {
+
+    maxHours: 3.0,
+
+    avgSpeed: 35,            // 地铁平均时速 km/h（含停站）
+
+    label: '地铁',
+
+    useOSRM: false,
+
+    icon: '🚇'
+
+  },
+
+  bicycle: {
+
+    maxHours: 4.0,
+
+    avgSpeed: 15,            // 自行车平均时速 km/h
+
+    restTimePerHour: 0.25,   // 每小时休息15分钟
+
+    label: '自行车',
+
+    useOSRM: false,
+
+    icon: '🚲'
+
+  },
+
+  roundtrip: {
+
+    maxHours: 4.0,           // 单程4小时，往返8小时
+
+    speedFactor: 1.0,
+
+    label: '往返',
+
+    useOSRM: true,
+
+    icon: '🔄'
+
+  }
+
+};
+
+
 
 // ── 工具函数 ──
 function haversine(lng1, lat1, lng2, lat2) {
@@ -775,12 +1051,243 @@ function haversine(lng1, lat1, lng2, lat2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-function estimateDriveTime(lng, lat) {
-  const dist = haversine(currentOrigin[0], currentOrigin[1], lng, lat);
-  const roadDist = Math.round(dist * 1.35);
-  const time = Math.round(roadDist / 85 * 10) / 10;
-  return { time, dist: roadDist };
+function estimateDriveTime(lng, lat, mode = currentTransportMode) {
+
+  const straightDist = haversine(currentOrigin[0], currentOrigin[1], lng, lat);
+
+  const config = TRANSPORT_CONFIG[mode] || TRANSPORT_CONFIG.car;
+
+
+
+  let time, dist;
+
+
+
+  switch (mode) {
+
+    case 'car':
+
+    case 'roundtrip':
+
+      // 自驾：使用 OSRM 或估算
+
+      dist = Math.round(straightDist * 1.35); // 道路系数
+
+      time = Math.round(dist / 85 * 10) / 10; // 平均时速85km/h
+
+      break;
+
+
+
+    case 'motorcycle':
+
+      // 摩托车：基于汽车时间×1.2（速度约为汽车80%）
+
+      dist = Math.round(straightDist * 1.35);
+
+      time = Math.round(dist / 70 * 10) / 10; // 平均时速70km/h
+
+      break;
+
+
+
+    case 'highspeed':
+
+      // 高铁：直线距离/速度 + 出入站时间
+
+      dist = Math.round(straightDist);
+
+      time = Math.round(straightDist / config.avgSpeed * 10) / 10 + config.entryExitTime;
+
+      break;
+
+
+
+    case 'metro':
+
+      // 地铁：直线距离×1.3（地铁线路不是直线）/速度
+
+      dist = Math.round(straightDist * 1.3);
+
+      time = Math.round(dist / config.avgSpeed * 10) / 10;
+
+      break;
+
+
+
+    case 'bicycle':
+
+      // 自行车：直线距离×1.4（小路更多）/速度 + 休息时间
+
+      dist = Math.round(straightDist * 1.4);
+
+      const rideTime = dist / config.avgSpeed;
+
+      const restTime = Math.floor(rideTime) * config.restTimePerHour;
+
+      time = Math.round((rideTime + restTime) * 10) / 10;
+
+      break;
+
+
+
+    default:
+
+      dist = Math.round(straightDist * 1.35);
+
+      time = Math.round(dist / 85 * 10) / 10;
+
+  }
+
+
+
+  return { time, dist };
+
 }
+
+
+
+// 获取当前出行方式的最大小时数
+
+function getMaxHours() {
+
+  return TRANSPORT_CONFIG[currentTransportMode]?.maxHours || 5.0;
+
+}
+
+
+
+// 检查城市是否有地铁
+
+function hasMetro(cityName) {
+
+  if (!metroCitiesData || !metroCitiesData.cities) return false;
+
+  return metroCitiesData.cities.some(c =>
+
+    c.name === cityName || c.name === cityName.replace(/市$/, '')
+
+  );
+
+}
+
+
+
+// 查找最近的高铁站
+
+function findNearestStation(lng, lat) {
+
+  if (!railwayStationsData || !railwayStationsData.stations) return null;
+
+
+
+  let nearest = null;
+
+  let minDist = Infinity;
+
+
+
+  for (const city of railwayStationsData.stations) {
+
+    for (const station of city.stations || []) {
+
+      const d = haversine(lng, lat, station.lng, station.lat);
+
+      if (d < minDist) {
+
+        minDist = d;
+
+        nearest = { ...station, cityName: city.name, distance: d };
+
+      }
+
+    }
+
+  }
+
+
+
+  return nearest;
+
+}
+
+
+
+// 异步加载地铁和高铁数据
+
+async function loadTransportData() {
+
+  try {
+
+    if (!metroCitiesData) {
+
+      const res = await fetch('data/metro-cities.json');
+
+      metroCitiesData = await res.json();
+
+    }
+
+  } catch (e) {
+
+    console.warn('Failed to load metro cities data:', e);
+
+  }
+
+
+
+  try {
+
+    if (!railwayStationsData) {
+
+      const res = await fetch('data/railway-stations.json');
+
+      railwayStationsData = await res.json();
+
+    }
+
+  } catch (e) {
+
+    console.warn('Failed to load railway stations data:', e);
+
+  }
+
+}
+
+
+
+// 更新地铁选项可用性
+
+function updateMetroOption(cityName) {
+
+  const metroOption = document.getElementById('metro-option');
+
+  if (!metroOption) return;
+
+
+
+  const hasMetroCity = hasMetro(cityName);
+
+  metroOption.disabled = !hasMetroCity;
+
+
+
+  if (!hasMetroCity) {
+
+    // 如果当前选中的是地铁，自动切换回自驾
+
+    if (currentTransportMode === 'metro') {
+
+      currentTransportMode = 'car';
+
+      document.getElementById('transport-select').value = 'car';
+
+    }
+
+  }
+
+}
+
+
 
 function getDriveData(feature) {
   const code = String(feature?.properties?.adcode || "");
@@ -833,13 +1340,23 @@ const infoName = document.getElementById("info-name");
 const infoDetail = document.getElementById("info-detail");
 
 function showInfo(dd) {
+
   if (!dd) { infoPanel.style.display = "none"; return; }
+
   const isOrigin = dd.isOrigin || dd.time === 0;
-  infoName.textContent = isOrigin ? `🚗 ${dd.name}（${t('origin')}）` : dd.name;
+
+  const modeIcon = TRANSPORT_CONFIG[currentTransportMode]?.icon || '🚗';
+
+  infoName.textContent = isOrigin ? `${modeIcon} ${dd.name}（${t('origin')}）` : dd.name;
+
   infoDetail.innerHTML = isOrigin
+
     ? `<span class="time">${t('originLabel')}</span>`
+
     : `<span class="time">🕐 ${fmtTime(dd.time)} ${t('timeUnit')}</span> · ${dd.dist} km${dd.estimated ? ' ' + t('estimated') : ''}`;
+
   infoPanel.style.display = "block";
+
 }
 
 // ── 标签 ──
@@ -850,7 +1367,7 @@ function updateLabels() {
   const placed = [];
 
   const allFeatures = [
-    ...allCountyFeatures.filter(f => { const d = getDriveData(f); if(!d) return false; if(String(f?.properties?.adcode)===originAdcode) return true; if(d.time>MAX_DRIVE_HOURS) return false; const c=f?.properties?.centroid||f?.properties?.center; if(c){const sd=haversine(currentOrigin[0],currentOrigin[1],c[0],c[1]); if(sd>MAX_STRAIGHT_KM) return false;} return true; }).map(f => ({ f, core: true })),
+    ...allCountyFeatures.filter(f => { const d = getDriveData(f); if(!d) return false; if(String(f?.properties?.adcode)===originAdcode) return true; if(d.time>getMaxHours()) return false; const c=f?.properties?.centroid||f?.properties?.center; if(c){const sd=haversine(currentOrigin[0],currentOrigin[1],c[0],c[1]); if(sd>MAX_STRAIGHT_KM) return false;} return true; }).map(f => ({ f, core: true })),
     ...allGrayFeatures.map(f => ({ f, core: false }))
   ];
 
@@ -1162,12 +1679,19 @@ function renderMap(skipFitBounds = false) {
     activeLayers.push(grayBorderLayer);
   }
 
-  // 过滤掉超过 MAX_DRIVE_HOURS 或直线距离过远的区县（避免飞地）
+  // 过滤掉超过最大小时数或直线距离过远的区县（避免飞地）
+
+  const maxHours = getMaxHours();
+
   const visibleFeatures = allCountyFeatures.filter(f => {
+
     const d = getDriveData(f);
+
     if (!d) return false;
+
     if (String(f?.properties?.adcode) === originAdcode) return true;
-    if (d.time > MAX_DRIVE_HOURS) return false;
+
+    if (d.time > maxHours) return false;
     // 直线距离检查：防止远处孤立区县通过高速连通导致飞地
     const center = f?.properties?.centroid || f?.properties?.center;
     if (center) {
@@ -1338,8 +1862,20 @@ async function switchCity(name, lng, lat, countryCode) {
   infoPanel.style.display = "none";
 
   // 2. 更新 origin
+
   currentOrigin = [lng, lat];
+
   currentCityName = name;
+
+
+
+  // 2.5 加载交通数据并更新地铁选项
+
+  await loadTransportData();
+
+  updateMetroOption(name);
+
+
 
   // 3. 更新标题 + URL（四处同步）
   document.getElementById("title-sub").textContent = t('subtitle', { city: name });
@@ -1732,9 +2268,76 @@ async function welcomeSelectCity(name) {
     }, 400);
   });
   input.addEventListener('keydown', e => {
+
     if (e.key === 'Escape') { results.style.display = 'none'; }
+
   });
+
 })();
+
+
+
+// ── 出行方式切换 ──
+
+document.getElementById('transport-select').addEventListener('change', async (e) => {
+
+  const newMode = e.target.value;
+
+
+
+  // 如果切换到地铁但当前城市没有地铁，阻止切换
+
+  if (newMode === 'metro' && !hasMetro(currentCityName)) {
+
+    e.target.value = currentTransportMode;
+
+    return;
+
+  }
+
+
+
+  currentTransportMode = newMode;
+
+
+
+  // 更新往返模式指示器
+
+  const roundTripIndicator = document.getElementById('round-trip-indicator');
+
+  if (newMode === 'roundtrip') {
+
+    roundTripIndicator.classList.add('active');
+
+  } else {
+
+    roundTripIndicator.classList.remove('active');
+
+  }
+
+
+
+  // 重新计算并渲染
+
+  if (currentCityName) {
+
+    showLoading(t('loading'));
+
+    // 清除旧的驾车数据缓存
+
+    driveDataMap = {};
+
+    // 重新渲染地图
+
+    renderMap(true);
+
+    hideLoading();
+
+  }
+
+});
+
+
 
 // ── 首次加载 ──
 (async function init() {
