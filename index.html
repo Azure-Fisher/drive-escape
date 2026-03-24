@@ -568,49 +568,83 @@
 
 
 
-      /* 搜索框 - 第一行全宽 */
+      /* 搜索框 - 左侧，和标题对齐 */
 
       .top-controls .search-box {
 
+
+
         position: fixed;
+
+
 
         top: 52px;
 
+
+
         left: 10px;
 
-        right: 10px;
 
-        width: auto;
+
+        width: calc(50% - 20px);
+
+
 
         z-index: 1001;
 
+
+
       }
+
+
 
       .top-controls input[type="text"] {
 
+
+
         width: 100%;
 
-        height: 40px;
 
-        padding: 0 14px;
 
-        font-size: 14px;
+        height: 36px;
+
+
+
+        padding: 0 12px;
+
+
+
+        font-size: 13px;
+
+
 
       }
 
 
 
-      /* 交通方式 - 第二行左侧 */
+      /* 交通方式 - 右侧，搜索框同一行 */
+
+
 
       .top-controls .transport-switcher {
 
+
+
         position: fixed;
 
-        top: 98px;
 
-        left: 10px;
+
+        top: 52px;
+
+
+
+        right: 10px;
+
+
 
         z-index: 1001;
+
+
 
       }
 
@@ -626,16 +660,18 @@
 
 
 
-      /* 往返筛选 - 第二行右侧 */
-
-      .top-controls .roundtrip-filter {
-
-        position: fixed;
-
-        top: 98px;
-
-        right: 10px;
-
+      /* 往返筛选 - 右侧，交通方式左边 */
+
+      .top-controls .roundtrip-filter {
+
+        position: fixed;
+
+        top: 52px;
+
+        right: auto;
+
+        left: calc(50% + 5px);
+
         z-index: 1001;
 
         padding: 8px 10px;
@@ -1675,35 +1711,64 @@ function geoURL(code) {
 
 }
 
-async function fetchJSON(url, timeoutMs = 15000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-  // 判断是否是本地代理路径
-  const isProxyUrl = url.startsWith('/api/');
-
-  try {
-    const options = {
-      signal: controller.signal,
-      headers: { 'Accept': 'application/json' }
-    };
-    // 只有非代理路径才需要 CORS 模式
-    if (!isProxyUrl) {
-      options.mode = 'cors';
-    }
-    const r = await fetch(url, options);
-    clearTimeout(timer);
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return r.json();
-  } catch(e) {
-    clearTimeout(timer);
-    // 只有非代理 URL 才尝试 CORS 代理
-    if (!isProxyUrl && e.name === 'TypeError') {
-      console.warn('Direct fetch failed, trying CORS proxy...');
-      return fetchWithProxy(url, timeoutMs);
-    }
-    throw e;
-  }
+async function fetchJSON(url, timeoutMs = 15000) {
+
+  const controller = new AbortController();
+
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+
+
+  // 判断是否是本地代理路径
+
+  const isProxyUrl = url.startsWith('/api/');
+
+
+
+  try {
+
+    const options = {
+
+      signal: controller.signal,
+
+      headers: { 'Accept': 'application/json' }
+
+    };
+
+    // 只有非代理路径才需要 CORS 模式
+
+    if (!isProxyUrl) {
+
+      options.mode = 'cors';
+
+    }
+
+    const r = await fetch(url, options);
+
+    clearTimeout(timer);
+
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    return r.json();
+
+  } catch(e) {
+
+    clearTimeout(timer);
+
+    // 只有非代理 URL 才尝试 CORS 代理
+
+    if (!isProxyUrl && e.name === 'TypeError') {
+
+      console.warn('Direct fetch failed, trying CORS proxy...');
+
+      return fetchWithProxy(url, timeoutMs);
+
+    }
+
+    throw e;
+
+  }
+
 }
 
 async function fetchWithProxy(url, timeoutMs = 15000) {
