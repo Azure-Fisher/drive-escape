@@ -330,17 +330,28 @@
 
     }
 
-    #search-results {
-      margin-top: 4px;
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-      overflow: hidden;
-      display: none;
-      position: relative;
-      z-index: 1010;
+    #search-results {
+
+      margin-top: 4px;
+
+      background: rgba(255,255,255,0.95);
+
+      backdrop-filter: blur(8px);
+
+      -webkit-backdrop-filter: blur(8px);
+
+      border-radius: 10px;
+
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+
+      overflow: hidden;
+
+      display: none;
+
+      position: relative;
+
+      z-index: 1010;
+
     }
     #search-results .result-item {
       padding: 8px 14px;
@@ -1648,8 +1659,13 @@ const CORS_PROXIES = [
 ];
 let currentProxyIndex = 0;
 
-function geoURL(code) {
-  return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
+function geoURL(code) {
+  // 优先使用本地代理（Cloudflare Function）
+  if (window.location.hostname !== 'localhost' && window.location.protocol !== 'file:') {
+    return `/api/geo?code=${code}`;
+  }
+  // 本地开发：直接访问阿里云（配合 CORS 代理）
+  return `https://geo.datav.aliyun.com/areas_v3/bound/${code}_full.json`;
 }
 
 async function fetchJSON(url, timeoutMs = 15000) {
