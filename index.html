@@ -660,18 +660,30 @@
 
 
 
-      /* 往返筛选 - 右侧，交通方式左边 */
-
-      .top-controls .roundtrip-filter {
-
-        position: fixed;
-
-        top: 52px;
-
-        right: auto;
-
-        left: calc(50% + 5px);
-
+      /* 往返筛选 - 右侧，交通方式左边 */
+
+
+
+      .top-controls .roundtrip-filter {
+
+
+
+        position: fixed;
+
+
+
+        top: 52px;
+
+
+
+        right: auto;
+
+
+
+        left: calc(50% + 5px);
+
+
+
         z-index: 1001;
 
         padding: 8px 10px;
@@ -1711,64 +1723,82 @@ function geoURL(code) {
 
 }
 
-async function fetchJSON(url, timeoutMs = 15000) {
-
-  const controller = new AbortController();
-
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-
-
-
-  // 判断是否是本地代理路径
-
-  const isProxyUrl = url.startsWith('/api/');
-
-
-
-  try {
-
-    const options = {
-
-      signal: controller.signal,
-
-      headers: { 'Accept': 'application/json' }
-
-    };
-
-    // 只有非代理路径才需要 CORS 模式
-
-    if (!isProxyUrl) {
-
-      options.mode = 'cors';
-
-    }
-
-    const r = await fetch(url, options);
-
-    clearTimeout(timer);
-
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-
-    return r.json();
-
-  } catch(e) {
-
-    clearTimeout(timer);
-
-    // 只有非代理 URL 才尝试 CORS 代理
-
-    if (!isProxyUrl && e.name === 'TypeError') {
-
-      console.warn('Direct fetch failed, trying CORS proxy...');
-
-      return fetchWithProxy(url, timeoutMs);
-
-    }
-
-    throw e;
-
-  }
-
+async function fetchJSON(url, timeoutMs = 15000) {
+
+  const controller = new AbortController();
+
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+
+
+  // 判断是否是本地代理路径
+
+  const isProxyUrl = url.startsWith('/api/');
+
+
+
+  try {
+
+    const options = {
+
+      signal: controller.signal,
+
+      headers: { 'Accept': 'application/json' }
+
+    };
+
+    // 只有非代理路径才需要 CORS 模式
+
+    if (!isProxyUrl) {
+
+      options.mode = 'cors';
+
+    }
+
+    const r = await fetch(url, options);
+
+    clearTimeout(timer);
+
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+
+    return r.json();
+
+  } catch(e) {
+
+    clearTimeout(timer);
+
+    // 代理 URL 失败时，回退到直接访问阿里云 API
+
+    if (isProxyUrl) {
+
+      const codeMatch = url.match(/code=(\d+)/);
+
+      if (codeMatch) {
+
+        const directUrl = `https://geo.datav.aliyun.com/areas_v3/bound/${codeMatch[1]}_full.json`;
+
+        console.warn(`Proxy failed, trying direct access: ${directUrl}`);
+
+        return fetchWithProxy(directUrl, timeoutMs);
+
+      }
+
+    }
+
+    // 非代理 URL 失败时尝试 CORS 代理
+
+    if (e.name === 'TypeError') {
+
+      console.warn('Direct fetch failed, trying CORS proxy...');
+
+      return fetchWithProxy(url, timeoutMs);
+
+    }
+
+    throw e;
+
+  }
+
 }
 
 async function fetchWithProxy(url, timeoutMs = 15000) {
