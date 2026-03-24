@@ -439,35 +439,75 @@
 
 
 
-      .loading-overlay { bottom: 10px; }
-      .loading-box { font-size: 11px; padding: 5px 12px; }
-
-      /* 出行方式选择器移动端适配 */
-      .transport-mode {
-        top: 68px;
-        left: 10px;
-      }
-      .transport-mode select {
-        padding: 6px 10px;
-        font-size: 11px;
-        min-width: 100px;
-      }
-      .round-trip-indicator {
-        top: 100px;
-        left: 10px;
-        font-size: 10px;
-        padding: 4px 8px;
-      }
+.loading-overlay { bottom: 10px; }
+      .loading-box { font-size: 11px; padding: 5px 12px; }
+
+      /* 出行方式选择器移动端适配 - 放在标题下方左侧 */
+      .transport-mode {
+        top: 56px;
+        left: 8px;
+      }
+      .transport-mode select {
+        padding: 6px 8px;
+        font-size: 11px;
+        min-width: 90px;
+      }
+      .round-trip-indicator {
+        top: 88px;
+        left: 8px;
+        font-size: 10px;
+        padding: 4px 8px;
+      }
+
+      /* 搜索框移到右侧，与出行方式对称 */
+      .top-controls .search-box {
+        top: 56px;
+        left: auto;
+        right: 8px;
+        transform: none;
+        width: 140px;
+      }
+      .top-controls input[type="text"] {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      /* 搜索结果下拉 */
+      #search-results {
+        position: fixed;
+        top: auto;
+        bottom: auto;
+        left: auto;
+        right: 8px;
+        width: 140px;
+        max-height: 180px;
+      }
+
+      /* 图例缩小并上移，避免被搜索结果遮挡 */
+      .legend {
+        left: 6px;
+        bottom: 60px;
+        width: 72px;
+        padding: 4px;
+        font-size: 7px;
+      }
+      .legend h3 { font-size: 7px; margin-bottom: 2px; }
+      .legend .item, .legend .band { gap: 2px; margin: 1px 0; }
+      .legend .swatch { width: 8px; height: 5px; }
+      .legend .line-swatch { width: 8px; }
+      .legend .hatch { width: 8px; height: 5px; }
+
+      /* 信息面板上移 */
+      .info-panel {
+        right: 6px;
+        bottom: 60px;
+        max-width: 130px;
+        padding: 6px 8px;
+        font-size: 10px;
+      }
     }
 
-    /* ── 欢迎屏 ── */
-    #welcome-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 2000;
-      background: #e8e4d8;
-      display: flex;
-      align-items: center;
+    /* ── 欢迎屏 ── */      align-items: center;
       justify-content: center;
       transition: opacity 0.5s ease;
     }
