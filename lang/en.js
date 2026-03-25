@@ -2,7 +2,7 @@ window.LANG = {
   code: 'en',
   label: 'English',
   title: 'Weekend Drive Escape',
-  titleEn: 'Weekend Self-Driving Escape Plan',
+  titleEn: 'Weekend Travel Map',
   subtitle: '{city} · Time & Distance',
   searchPlaceholder: 'Search departure city...',
   loading: 'Loading district data...',
@@ -22,7 +22,7 @@ window.LANG = {
   noResult: 'No results',
   searchFailed: 'Search failed',
   welcomeHeadline: 'Weekend Self-Drive Escape Plan',
-  welcomeSub: 'Enter your city and explore how far you can drive in a weekend',
+  welcomeSub: 'Enter your city and explore your travel range',
   welcomeQuickLabel: 'Popular cities',
   welcomeCities: ['London', 'Paris', 'Tokyo', 'Shanghai', 'Sydney']
 };

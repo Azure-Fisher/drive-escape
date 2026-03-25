@@ -2,7 +2,7 @@ window.LANG = {
   code: 'zh-TW',
   label: '繁體中文',
   title: '週末自駕逃離計畫',
-  titleEn: 'Weekend Self-Driving Escape Plan',
+  titleEn: 'Weekend Travel Map',
   subtitle: '{city} · 耗時&距離',
   searchPlaceholder: '搜尋出發城市...',
   loading: '正在載入區劃資料...',
