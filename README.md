@@ -62,8 +62,18 @@ wrangler pages deploy . --project-name drive-escape
 
 | 版本 | Commit | 说明 |
 |------|--------|------|
+| v2.0 | `27fbbf6` | MD3 设计风格 + 多出行方式 |
 | v1.1 | `8f1cf9b` | 多出行方式 + 代理降级机制 |
 | v1.0 | 原版 | 基础自驾功能 |
+
+## 🎨 设计规范
+
+本项目采用 [Material Design 3](https://m3.material.io/) 设计规范：
+- 语义化颜色系统 + 深色模式支持
+- MD3 标准形状（圆角）
+- 5 级阴影系统
+- 弹性动效曲线
+- MD3 组件风格（Card、Select、Chip 等）
 
 ## 📄 许可证
 
