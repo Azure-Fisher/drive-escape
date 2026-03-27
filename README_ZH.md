@@ -1,7 +1,9 @@
-# 🚗 周末出行计划
-
-选一个城市，一眼看清你能走多远。
-
+# 🚗 周末出行计划
+
+**🌐 在线预览** → [escape.blucy.top](https://escape.blucy.top)
+
+选一个城市，一眼看清你能走多远。
+
 **Fork 自** → [qiaoshouqing/drive-escape](https://github.com/qiaoshouqing/drive-escape)
 
 **原作者** → [@benshandebiao](https://x.com/benshandebiao)
