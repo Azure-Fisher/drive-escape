@@ -2168,6 +2168,54 @@ async function switchCity(name, lng, lat, countryCode) {
   // 4. loading
   showLoading(t('loading'));
 
+  
+  // 5.0 尝试加载预设城市数据（避免 OSRM 计算）
+  const presetCities = ['北京', '上海', '杭州', '成都', '西安'];
+  const presetFiles = {
+    '北京': 'data/beijing.json',
+    '上海': 'data/shanghai.json', 
+    '杭州': 'data/hangzhou.json',
+    '成都': 'data/chengdu.json',
+    '西安': 'data/xian.json'
+  };
+  
+  if (presetCities.includes(name)) {
+    try {
+      const presetUrl = presetFiles[name];
+      showLoading(t('loading'));
+      const presetRes = await fetch(presetUrl);
+      const presetData = await presetRes.json();
+      
+      // 提取 features（GeoJSON 边界）
+      if (presetData.features) {
+        allCountyFeatures = presetData.features;
+      }
+      
+      // 提取驾车数据（根对象中除 features 外的字段）
+      const driveData = {};
+      for (const [key, value] of Object.entries(presetData)) {
+        if (key !== 'features' && typeof value === 'object' && value.name) {
+          driveData[key] = value;
+        }
+      }
+      driveDataMap = driveData;
+      
+      // 更新 origin 标记
+      if (originAdcode && driveDataMap[originAdcode]) {
+        driveDataMap[originAdcode].isOrigin = true;
+        driveDataMap[originAdcode].time = 0;
+        driveDataMap[originAdcode].dist = 0;
+      }
+      
+      renderMap();
+      hideLoading();
+      updateURL(name);
+      return; // 使用预设数据，直接返回
+    } catch(e) {
+      console.warn('预设数据加载失败，回退到动态加载:', e);
+    }
+  }
+
   // 5. 判断是否在中国范围内
   const isChina = countryCode === 'cn' || (!countryCode && lat > 17 && lat < 55 && lng > 73 && lng < 136);
 
