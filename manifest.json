@@ -1,0 +1,37 @@
+{
+  "name": "周末出行地图",
+  "short_name": "出行地图",
+  "description": "支持自驾、摩托、高铁、地铁、自行车多种出行方式的出行规划工具",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5FBF7",
+  "theme_color": "#006B5A",
+  "orientation": "any",
+  "scope": "/",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["navigation", "travel", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "搜索城市",
+      "short_name": "搜索",
+      "description": "搜索新的出发城市",
+      "url": "/?action=search",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "96x96" }]
+    }
+  ]
+}

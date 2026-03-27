@@ -820,8 +820,31 @@
       .welcome-headline { font-size: 21px; }
     }
   </style>
+
+  <!-- PWA 配置 -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#006B5A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="出行地图">
+  
+  <!-- 图标 -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+CiAgPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNiIgZmlsbD0iIzAwNkI1QSIvPgogIDxwYXRoIGQ9Ik01IDkgTDEzIDcgTDIxIDkgTDI4IDcgTDI4IDIzIEwyMSAyNSBMMTMgMjMgTDUgMjUgWiIgZmlsbD0icmdiYSg5MywyMTksMTkyLDAuMykiLz4KICA8cGF0aCBkPSJNNyAxMyBRMTMgMTEgMTcgMTUgUTIxIDE5IDI2IDE3IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgZmlsbD0ibm9uZSIvPgogIDxjaXJjbGUgY3g9IjciIGN5PSIxMyIgcj0iMiIgZmlsbD0id2hpdGUiLz4KICA8Y2lyY2xlIGN4PSIyNiIgY3k9IjE3IiByPSIyIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
+  <script>
+    // 注册 Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registered:', reg.scope))
+          .catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
 
 <div id="welcome-screen">
   <div class="lang-switcher">

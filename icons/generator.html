@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>图标生成器 - 右键保存图片</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; background: #f5f5f5; }
+    .icon-container { 
+      display: inline-block; 
+      margin: 10px; 
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    canvas { display: block; margin: 10px auto; }
+    .size { font-size: 12px; color: #666; margin-top: 5px; }
+    h1 { color: #006B5A; }
+    .instructions { background: #e8f5f0; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <h1>🚗 周末出行地图 - 图标生成器</h1>
+  <div class="instructions">
+    <strong>使用方法：</strong>右键点击每个图标 → "图片另存为..." → 保存为对应文件名
+  </div>
+  <div id="icons"></div>
+
+  <script>
+    const sizes = [16, 32, 72, 96, 128, 144, 152, 192, 384, 512];
+    
+    function drawIcon(ctx, size) {
+      const scale = size / 512;
+      
+      // 背景
+      ctx.fillStyle = '#006B5A';
+      roundRect(ctx, 0, 0, size, size, size * 0.19);
+      
+      // 地图区域（简化）
+      ctx.fillStyle = 'rgba(93, 219, 192, 0.3)';
+      ctx.beginPath();
+      ctx.moveTo(size * 0.16, size * 0.27);
+      ctx.lineTo(size * 0.39, size * 0.20);
+      ctx.lineTo(size * 0.63, size * 0.27);
+      ctx.lineTo(size * 0.84, size * 0.20);
+      ctx.lineTo(size * 0.84, size * 0.73);
+      ctx.lineTo(size * 0.63, size * 0.80);
+      ctx.lineTo(size * 0.39, size * 0.73);
+      ctx.lineTo(size * 0.16, size * 0.80);
+      ctx.closePath();
+      ctx.fill();
+      
+      // 路线
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = Math.max(3, size * 0.047);
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(size * 0.23, size * 0.39);
+      ctx.quadraticCurveTo(size * 0.39, size * 0.35, size * 0.51, size * 0.47);
+      ctx.quadraticCurveTo(size * 0.63, size * 0.59, size * 0.78, size * 0.55);
+      ctx.stroke();
+      
+      // 起点
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(size * 0.23, size * 0.39, size * 0.055, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#006B5A';
+      ctx.beginPath();
+      ctx.arc(size * 0.23, size * 0.39, size * 0.031, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 终点
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(size * 0.78, size * 0.55, size * 0.055, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 终点勾选
+      ctx.strokeStyle = '#006B5A';
+      ctx.lineWidth = Math.max(2, size * 0.012);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(size * 0.76, size * 0.55);
+      ctx.lineTo(size * 0.77, size * 0.57);
+      ctx.lineTo(size * 0.80, size * 0.53);
+      ctx.stroke();
+    }
+    
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+    
+    // 生成所有尺寸的图标
+    sizes.forEach(size => {
+      const container = document.createElement('div');
+      container.className = 'icon-container';
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      drawIcon(ctx, size);
+      
+      const label = document.createElement('div');
+      label.className = 'size';
+      label.textContent = `${size}x${size} → icon-${size}.png`;
+      
+      container.appendChild(canvas);
+      container.appendChild(label);
+      document.getElementById('icons').appendChild(container);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="96" fill="#006B5A"/>
+  
+  <!-- 地图区域 -->
+  <path d="M80 140 L200 100 L320 140 L432 100 L432 372 L320 412 L200 372 L80 412 Z" 
+        fill="#5DDBC0" opacity="0.3"/>
+  
+  <!-- 路线 -->
+  <path d="M120 200 Q200 180 260 240 Q320 300 400 280" 
+        stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" fill="none"/>
+  
+  <!-- 起点标记 -->
+  <circle cx="120" cy="200" r="28" fill="#FFFFFF"/>
+  <circle cx="120" cy="200" r="16" fill="#006B5A"/>
+  
+  <!-- 终点标记 -->
+  <circle cx="400" cy="280" r="28" fill="#FFFFFF"/>
+  <path d="M388 280 L395 290 L412 270" stroke="#006B5A" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- 装饰点 -->
+  <circle cx="200" cy="185" r="12" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="280" cy="250" r="12" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="340" cy="285" r="12" fill="#FFFFFF" opacity="0.8"/>
+</svg>
