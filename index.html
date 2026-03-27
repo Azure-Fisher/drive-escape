@@ -1823,41 +1823,71 @@ const DIRECT_MUNICIPALITIES = new Set([110000, 120000, 310000, 500000]);
 
 async function loadProvinceCounties(provAdcode) {
   try {
-    const json = await fetchGeoJSON(provAdcode);
-    const features = json.features || [];
-    const provOutline = features.find(f => Number(f?.properties?.adcode) === provAdcode) || null;
-    const cities = features.filter(f => Number(f?.properties?.adcode || 0) !== provAdcode);
-
-    // 直辖市：省级 _full 返回的子级就是区，直接用
+    // 本地化：加载 province.json 获取市级边界
+    const provUrl = `data/geo/${provAdcode}/province.json`;
+    let cities = [];
+    
+    try {
+      const provRes = await fetch(provUrl);
+      if (provRes.ok) {
+        const provData = await provRes.json();
+        cities = provData.features || [];
+        provinceCache[provAdcode] = provData;
+      }
+    } catch (e) {
+      console.warn('加载 province.json 失败:', e.message);
+    }
+    
+    // 直辖市：省级 _full 返回的子级就是区，直接从 counties.json 获取
     if (DIRECT_MUNICIPALITIES.has(provAdcode)) {
+      const countiesUrl = `data/geo/${provAdcode}/counties.json`;
+      let counties = [];
+      try {
+        const res = await fetch(countiesUrl);
+        if (res.ok) {
+          const data = await res.json();
+          counties = data.features || [];
+          geoDataCache[provAdcode] = data;
+        }
+      } catch (e) {}
+      
       return {
-        provAdcode, provOutline,
-        cityResults: [{ adcode: provAdcode, counties: cities, outline: provOutline }]
+        provAdcode,
+        provOutline: null,
+        cityResults: [{ adcode: provAdcode, counties, outline: null }]
       };
     }
-
-    // 普通省：并发限制加载每个市的区县（最多5个同时）
-    const cityTasks = cities.map(city => async () => {
-      const cityCode = Number(city?.properties?.adcode);
-      try {
-        const cj = await fetchGeoJSON(cityCode);
-        const counties = (cj.features || []).filter(f => {
-          const parent = Number(f?.properties?.parent?.adcode || 0);
-          return parent === cityCode;
-        });
-        return { adcode: cityCode, counties, outline: city };
-      } catch(e) {
-        return { adcode: cityCode, counties: [], outline: city };
+    
+    // 普通省：加载区县数据
+    const countiesUrl = `data/geo/${provAdcode}/counties.json`;
+    let countiesData = { features: [] };
+    
+    try {
+      const res = await fetch(countiesUrl);
+      if (res.ok) {
+        countiesData = await res.json();
+        geoDataCache[provAdcode] = countiesData;
       }
+    } catch (e) {
+      console.warn('加载 counties.json 失败:', e.message);
+    }
+    
+    // 按城市分组区县
+    const cityResults = cities.map(city => {
+      const cityCode = city?.properties?.adcode;
+      const countyList = (countiesData.features || []).filter(f => {
+        const parent = f?.properties?.parent?.adcode;
+        return String(parent) === String(cityCode);
+      });
+      return { adcode: cityCode, counties: countyList, outline: city };
     });
-    const cityResults = await parallelLimit(cityTasks, 5);
-
-    return { provAdcode, provOutline, cityResults };
-  } catch(e) {
+    
+    return { provAdcode, provOutline: null, cityResults };
+  } catch (e) {
+    console.error('loadProvinceCounties error:', e);
     return { provAdcode, provOutline: null, cityResults: [] };
   }
 }
-
 // 加载省级轮廓（市级，不展开区县）
 async function loadProvinceCities(provAdcode) {
   try {
@@ -2460,7 +2490,7 @@ async function switchCity(name, lng, lat, countryCode) {
         estimated: true
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch(e) {} catch(e) {}
+    } catch(e) {}
   }
 
   // 更新 URL
