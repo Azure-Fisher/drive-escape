@@ -2,6 +2,12 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
+  <!-- 资源预加载 -->
+  <link rel="preload" href="lang/zh-CN.js" as="script">
+  <link rel="preload" href="data/metro-cities.json" as="fetch" crossorigin>
+  <link rel="preload" href="data/railway-stations.json" as="fetch" crossorigin>
+  <link rel="preconnect" href="https://router.project-osrm.org">
+  <link rel="preconnect" href="https://geo.datav.aliyun.com">
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>周末出行地图</title>
   <!-- Google tag (gtag.js) -->
@@ -1832,7 +1838,7 @@ async function fetchOSRMBatch(originLng, originLat, destinations) {
   // destinations: [{ adcode, lng, lat, name }]
   // 每批最多 50 个
   const results = {};
-  const batchSize = 50;
+  const batchSize = 100; // OSRM 最大支持 100
 
   for (let i = 0; i < destinations.length; i += batchSize) {
     const batch = destinations.slice(i, i + batchSize);
@@ -1862,7 +1868,7 @@ async function fetchOSRMBatch(originLng, originLat, destinations) {
 
     // 批次间间隔
     if (i + batchSize < destinations.length) {
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 100)); // 减少延迟提升速度
     }
   }
   return results;
@@ -2063,8 +2069,13 @@ function renderMap(skipFitBounds = false) {
   }
 
   updateLabels();
-  map.off("zoomend moveend", updateLabels);
-  map.on("zoomend moveend", updateLabels);
+  // 节流：避免频繁触发
+    let labelUpdateTimer = null;
+    map.off("zoomend moveend");
+    map.on("zoomend moveend", () => {
+      if (labelUpdateTimer) clearTimeout(labelUpdateTimer);
+      labelUpdateTimer = setTimeout(updateLabels, 100);
+    });
 }
 
 // ── 城市切换核心逻辑 ──
@@ -2153,7 +2164,7 @@ async function switchCity(name, lng, lat, countryCode) {
       if (dist < 800) nearProvinces.push(prov); // 800km 确保覆盖大省边缘区县
     }
 
-    const nearData = await parallelLimit(nearProvinces.map(p => () => loadProvinceCounties(p.code)), 3);
+    const nearData = await parallelLimit(nearProvinces.map(p => () => loadProvinceCounties(p.code)), 8); // 增加并发数
 
     for (const prov of nearData) {
       if (prov.provOutline) provinceOutlines.push(prov.provOutline);
@@ -2317,7 +2328,16 @@ async function switchCity(name, lng, lat, countryCode) {
   // 8. 检查本地缓存（用城市坐标作为 key）
   const cacheKey = `drive_${lng.toFixed(2)}_${lat.toFixed(2)}`;
   let cached = null;
-  try { cached = JSON.parse(localStorage.getItem(cacheKey)); } catch(e) {}
+  try {
+      cached = JSON.parse(localStorage.getItem(cacheKey));
+      // 检查缓存是否过期（24小时）或出行方式不匹配
+      if (cached && cached.data) {
+        const isExpired = Date.now() - (cached.timestamp || 0) > 24 * 60 * 60 * 1000;
+        const isWrongMode = cached.mode !== currentTransportMode;
+        if (isExpired || isWrongMode) cached = null;
+        else cached = cached.data;
+      }
+    } catch(e) { cached = null; }
 
   if (cached && typeof cached === 'object' && Object.keys(cached).length > 0) {
     // 有缓存：直接用缓存的 OSRM 数据
@@ -2346,7 +2366,7 @@ async function switchCity(name, lng, lat, countryCode) {
       }
     }
 
-    const batchSize = 50;
+    const batchSize = 100; // OSRM 最大支持 100
     const osrmCache = {};
     const batches = [];
     for (let i = 0; i < destinations.length; i += batchSize) {
@@ -2395,7 +2415,14 @@ async function switchCity(name, lng, lat, countryCode) {
     if (!signal.aborted) hideLoading();
 
     // 保存到 localStorage
-    try { localStorage.setItem(cacheKey, JSON.stringify(osrmCache)); } catch(e) {}
+    try {
+      const cacheData = {
+        data: osrmCache,
+        timestamp: Date.now(),
+        mode: currentTransportMode
+      };
+      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+    } catch(e) {}
   }
 
   // 更新 URL
