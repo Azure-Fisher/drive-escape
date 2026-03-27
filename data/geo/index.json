@@ -1,0 +1,85 @@
+{
+  "provinces": [
+    {
+      "code": 110000,
+      "countyCount": 16
+    },
+    {
+      "code": 120000,
+      "countyCount": 16
+    },
+    {
+      "code": 310000,
+      "countyCount": 16
+    },
+    {
+      "code": 320000,
+      "countyCount": 13
+    },
+    {
+      "code": 330000,
+      "countyCount": 90
+    },
+    {
+      "code": 340000,
+      "countyCount": 104
+    },
+    {
+      "code": 350000,
+      "countyCount": 84
+    },
+    {
+      "code": 360000,
+      "countyCount": 100
+    },
+    {
+      "code": 370000,
+      "countyCount": 136
+    },
+    {
+      "code": 410000,
+      "countyCount": 156
+    },
+    {
+      "code": 420000,
+      "countyCount": 99
+    },
+    {
+      "code": 430000,
+      "countyCount": 122
+    },
+    {
+      "code": 440000,
+      "countyCount": 122
+    },
+    {
+      "code": 450000,
+      "countyCount": 111
+    },
+    {
+      "code": 460000,
+      "countyCount": 10
+    },
+    {
+      "code": 500000,
+      "countyCount": 38
+    },
+    {
+      "code": 510000,
+      "countyCount": 183
+    },
+    {
+      "code": 520000,
+      "countyCount": 88
+    },
+    {
+      "code": 530000,
+      "countyCount": 129
+    },
+    {
+      "code": 610000,
+      "countyCount": 107
+    }
+  ],
+  "generated": "2026-03-27T10:03:16.399Z"
+}

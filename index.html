@@ -1295,98 +1295,77 @@ function haversine(lng1, lat1, lng2, lat2) {
 }
 
 function estimateDriveTime(lng, lat, mode = currentTransportMode) {
-
   const straightDist = haversine(currentOrigin[0], currentOrigin[1], lng, lat);
-
   const config = TRANSPORT_CONFIG[mode] || TRANSPORT_CONFIG.car;
 
+  // 根据距离动态调整道路系数
+  let roadFactor;
+  if (straightDist < 50) {
+    roadFactor = 1.45; // 城市道路，曲折多
+  } else if (straightDist < 150) {
+    roadFactor = 1.35; // 混合道路
+  } else if (straightDist < 400) {
+    roadFactor = 1.25; // 高速为主
+  } else {
+    roadFactor = 1.18; // 长途高速直线化
+  }
 
+  // 根据经纬度判断是否山区（道路更曲折）
+  const avgLat = (lat + currentOrigin[1]) / 2;
+  const isMountainous = (avgLat > 25 && avgLat < 45 && 
+    (lng > 100 && lng < 112)) || // 西南山区
+    (lng > 105 && lng < 115 && avgLat > 30 && avgLat < 40); // 秦岭
+  
+  if (isMountainous && mode !== 'highspeed') {
+    roadFactor *= 1.12;
+  }
 
   let time, dist;
 
-
-
   switch (mode) {
-
     case 'car':
-
     case 'roundtrip':
-
-      // 自驾：使用 OSRM 或估算
-
-      dist = Math.round(straightDist * 1.35); // 道路系数
-
-      time = Math.round(dist / 85 * 10) / 10; // 平均时速85km/h
-
+      dist = Math.round(straightDist * roadFactor);
+      // 根据距离调整平均速度
+      let avgSpeed;
+      if (straightDist < 30) avgSpeed = 42; // 城市拥堵
+      else if (straightDist < 100) avgSpeed = 62; // 混合
+      else if (straightDist < 300) avgSpeed = 78; // 高速为主
+      else avgSpeed = 92; // 长途高速
+      time = Math.round(dist / avgSpeed * 10) / 10;
       break;
-
-
 
     case 'motorcycle':
-
-      // 摩托车：基于汽车时间×1.2（速度约为汽车80%）
-
-      dist = Math.round(straightDist * 1.35);
-
-      time = Math.round(dist / 70 * 10) / 10; // 平均时速70km/h
-
+      dist = Math.round(straightDist * roadFactor);
+      const motoSpeed = straightDist < 50 ? 38 : straightDist < 150 ? 52 : 62;
+      time = Math.round(dist / motoSpeed * 10) / 10;
       break;
-
-
 
     case 'highspeed':
-
-      // 高铁：直线距离/速度 + 出入站时间
-
       dist = Math.round(straightDist);
-
       time = Math.round(straightDist / config.avgSpeed * 10) / 10 + config.entryExitTime;
-
       break;
-
-
 
     case 'metro':
-
-      // 地铁：直线距离×1.3（地铁线路不是直线）/速度
-
       dist = Math.round(straightDist * 1.3);
-
       time = Math.round(dist / config.avgSpeed * 10) / 10;
-
       break;
-
-
 
     case 'bicycle':
-
-      // 自行车：直线距离×1.4（小路更多）/速度 + 休息时间
-
-      dist = Math.round(straightDist * 1.4);
-
+      dist = Math.round(straightDist * 1.5);
       const rideTime = dist / config.avgSpeed;
-
       const restTime = Math.floor(rideTime) * config.restTimePerHour;
-
       time = Math.round((rideTime + restTime) * 10) / 10;
-
       break;
 
-
-
     default:
-
-      dist = Math.round(straightDist * 1.35);
-
-      time = Math.round(dist / 85 * 10) / 10;
-
+      dist = Math.round(straightDist * roadFactor);
+      time = Math.round(dist / 70 * 10) / 10;
   }
 
-
-
-  return { time, dist };
-
+  return { time, dist, estimated: true };
 }
+
 
 
 
@@ -1765,26 +1744,53 @@ async function fetchJSON(url, timeoutMs = 8000) {
   }
 }
 
-// 带降级的 GeoJSON 获取（代理失败时尝试直连）
+// 本地化：从本地 data/geo 目录加载行政区划数据
+const geoDataCache = {};
+
 async function fetchGeoJSON(code, timeoutMs = 10000) {
-  // 本地开发：直连
-  if (!useProxy()) {
-    return fetchJSON(geoURL(code), timeoutMs);
+  const codeStr = String(code);
+  
+  // 检查缓存
+  if (geoDataCache[codeStr]) {
+    return geoDataCache[codeStr];
   }
   
-  // 线上：先尝试代理，失败则降级直连
+  // 省级代码
+  const provCode = codeStr.substring(0, 2) + '0000';
+  const localUrl = `data/geo/${provCode}/counties.json`;
+  
   try {
-    return await fetchJSON(proxyURL(code), timeoutMs);
-  } catch (proxyError) {
-    console.warn(`代理请求失败 (code=${code})，尝试直连...`, proxyError.message);
-    try {
-      const data = await fetchJSON(geoURL(code), timeoutMs);
-      console.log(`直连成功 (code=${code})`);
+    const res = await fetch(localUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    
+    // 缓存整个省份数据
+    geoDataCache[provCode] = data;
+    
+    // 如果请求的是省级数据
+    if (codeStr.endsWith('0000')) {
       return data;
-    } catch (directError) {
-      console.error(`直连也失败了 (code=${code})`, directError.message);
-      throw directError;
     }
+    
+    // 请求的是市级数据，过滤出该市的区县
+    const cityFeatures = (data.features || []).filter(f => {
+      const parent = f?.properties?.parent?.adcode;
+      return String(parent) === codeStr || String(f?.properties?.adcode).startsWith(codeStr.substring(0, 4));
+    });
+    
+    return { type: 'FeatureCollection', features: cityFeatures };
+  } catch (e) {
+    console.warn(`本地数据加载失败 (code=${code})，尝试在线API...`, e.message);
+    
+    // 降级：尝试在线 API
+    try {
+      if (typeof geoURL === 'function') {
+        return await fetchJSON(geoURL(code), timeoutMs);
+      }
+    } catch (e2) {
+      console.error(`在线API也失败`, e2.message);
+    }
+    return { type: 'FeatureCollection', features: [] };
   }
 }
 
@@ -1857,6 +1863,8 @@ async function loadProvinceCities(provAdcode) {
 }
 
 // ── OSRM 批量驾车时间 ──
+// 已禁用（本地化）:
+/*
 async function fetchOSRMBatch(originLng, originLat, destinations) {
   // destinations: [{ adcode, lng, lat, name }]
   // 每批最多 50 个
@@ -1896,6 +1904,9 @@ async function fetchOSRMBatch(originLng, originLat, destinations) {
   }
   return results;
 }
+
+
+*/
 
 // ── 渲染地图 ──
 function renderMap(skipFitBounds = false) {
@@ -2426,74 +2437,21 @@ async function switchCity(name, lng, lat, countryCode) {
     hideLoading();
     updateURL(name);
 
-    // 9. OSRM 批量计算真实驾车时间（逐批更新渲染）
-    const destinations = [];
-    for (const f of allCountyFeatures) {
-      const code = String(f?.properties?.adcode || "");
-      const center = f?.properties?.centroid || f?.properties?.center;
-      const fname = f?.properties?.name || "";
-      if (center && center.length === 2) {
-        destinations.push({ adcode: code, lng: center[0], lat: center[1], name: fname });
-      }
-    }
-
-    const batchSize = 100; // OSRM 最大支持 100
-    const osrmCache = {};
-    const batches = [];
-    for (let i = 0; i < destinations.length; i += batchSize) {
-      batches.push(destinations.slice(i, i + batchSize));
-    }
-
-    // 串行逐批请求 OSRM，每批完成后刷新
-    showLoading(t('loadingDriveTime', { done: '0', total: String(batches.length) }));
-    for (let bi = 0; bi < batches.length; bi++) {
-      const batch = batches[bi];
-      const coords = `${lng},${lat};` + batch.map(d => `${d.lng},${d.lat}`).join(";");
-      const destIndices = batch.map((_, j) => j + 1).join(";");
-      const url = `https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&destinations=${destIndices}&annotations=duration,distance`;
-      try {
-        if (signal.aborted) break; // 欢迎屏打开，停止
-        const res = await fetch(url, { signal });
-        const data = await res.json();
-        if (data.code === "Ok") {
-          const durations = data.durations[0];
-          const distances = data.distances[0];
-          batch.forEach((d, j) => {
-            const timeSec = durations[j];
-            const distM = distances[j];
-            if (timeSec != null && timeSec > 0) {
-              const result = {
-                name: d.name,
-                time: Math.round(timeSec / 360) / 10,
-                dist: Math.round(distM / 1000)
-              };
-              driveDataMap[d.adcode] = { ...driveDataMap[d.adcode], ...result, estimated: false };
-              osrmCache[d.adcode] = result;
-            } else {
-              // OSRM 返回 null = 无法到达（跨海等），标记为超远
-              driveDataMap[d.adcode] = { ...driveDataMap[d.adcode], time: 999, dist: 0, estimated: false };
-              osrmCache[d.adcode] = { name: d.name, time: 999, dist: 0 };
-            }
-          });
-        }
-      } catch(e) {
-        if (e.name === 'AbortError') break; // 用户回到欢迎屏，停止
-      }
-      if (signal.aborted) break;
-      showLoading(t('loadingDriveTime', { done: String(bi + 1), total: String(batches.length) }));
-      renderMap(true);
-    }
-    if (!signal.aborted) hideLoading();
-
-    // 保存到 localStorage
+    // 本地化：跳过 OSRM，直接使用估算结果
+    console.log(`使用本地估算完成，共 ${Object.keys(driveDataMap).length} 个区县`);
+    
+    // 缓存估算结果
     try {
       const cacheData = {
-        data: osrmCache,
+        data: Object.fromEntries(
+          Object.entries(driveDataMap).map(([k, v]) => [k, { name: v.name, time: v.time, dist: v.dist }])
+        ),
         timestamp: Date.now(),
-        mode: currentTransportMode
+        mode: currentTransportMode,
+        estimated: true
       };
       localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-    } catch(e) {}
+    } catch(e) {} catch(e) {}
   }
 
   // 更新 URL
