@@ -1746,34 +1746,44 @@ async function fetchJSON(url, timeoutMs = 8000) {
 
 // 本地化：从本地 data/geo 目录加载行政区划数据
 const geoDataCache = {};
+const provinceCache = {}; // 省级/市级边界缓存
 
 async function fetchGeoJSON(code, timeoutMs = 10000) {
   const codeStr = String(code);
+  const provCode = codeStr.substring(0, 2) + '0000';
   
   // 检查缓存
   if (geoDataCache[codeStr]) {
     return geoDataCache[codeStr];
   }
   
-  // 省级代码
-  const provCode = codeStr.substring(0, 2) + '0000';
-  const localUrl = `data/geo/${provCode}/counties.json`;
-  
   try {
-    const res = await fetch(localUrl);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    
-    // 缓存整个省份数据
-    geoDataCache[provCode] = data;
-    
-    // 如果请求的是省级数据
+    // 如果请求的是省级数据，加载 province.json（包含省级和市级边界）
     if (codeStr.endsWith('0000')) {
+      if (provinceCache[provCode]) {
+        return provinceCache[provCode];
+      }
+      
+      const provUrl = `data/geo/${provCode}/province.json`;
+      const res = await fetch(provUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      provinceCache[provCode] = data;
       return data;
     }
     
-    // 请求的是市级数据，过滤出该市的区县
-    const cityFeatures = (data.features || []).filter(f => {
+    // 请求的是市级数据，从 counties.json 过滤
+    if (!geoDataCache[provCode]) {
+      const countiesUrl = `data/geo/${provCode}/counties.json`;
+      const res = await fetch(countiesUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      geoDataCache[provCode] = await res.json();
+    }
+    
+    const countiesData = geoDataCache[provCode];
+    
+    // 过滤出该市的区县
+    const cityFeatures = (countiesData.features || []).filter(f => {
       const parent = f?.properties?.parent?.adcode;
       return String(parent) === codeStr || String(f?.properties?.adcode).startsWith(codeStr.substring(0, 4));
     });
@@ -1793,7 +1803,6 @@ async function fetchGeoJSON(code, timeoutMs = 10000) {
     return { type: 'FeatureCollection', features: [] };
   }
 }
-
 // // 并发控制：最多同时 N 个请求
 async function parallelLimit(tasks, limit = 5) {
   const results = [];
