@@ -961,7 +961,6 @@ function t(key, vars) {
 }
 
 function applyLang() {
-  console.log("applyLang called, cities:", window.LANG?.welcomeCities);
   document.documentElement.lang = window.LANG?.code || 'zh-CN';
   document.querySelector('.title-overlay .en').textContent = t('titleEn');
   document.querySelector('.title-overlay h1').textContent = t('title');
@@ -2549,7 +2548,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function welcomeSelectCity(name) {
-  console.log("welcomeSelectCity called:", name);
   dismissWelcome();
   // 立即同步四处：标题、图例、URL、搜索框
   showLoading(t('loading'));
