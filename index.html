@@ -639,9 +639,34 @@
 
       /* 欢迎屏移动端 */
       .welcome-card {
-        padding: 32px 24px 28px;
-        margin: 16px;
-      }
+      background: var(--md-surface-container);
+      border-radius: var(--md-shape-corner-extra-large);
+      box-shadow: var(--md-elevation-3),
+                  0 0 40px color-mix(in srgb, var(--md-primary) 10%, transparent);
+      padding: 48px 48px 40px;
+      width: 480px;
+      max-width: 92vw;
+      text-align: center;
+      border: 1px solid var(--md-outline-variant);
+      animation: dialogEnter var(--md-motion-duration-medium4) var(--md-motion-emphasized);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* 卡片顶部装饰线 */
+    .welcome-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(90deg, 
+        var(--md-primary) 0%, 
+        var(--md-tertiary) 100%);
+      border-radius: 0 0 4px 4px;
+    }
       .welcome-headline { font-size: 22px; }
       .welcome-sub { font-size: 14px; margin-bottom: 24px; }
       .welcome-search-wrap input { padding: 14px 44px 14px 16px; }
@@ -655,12 +680,45 @@
       position: fixed;
       inset: 0;
       z-index: 2000;
-      background: var(--md-surface);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: opacity var(--md-motion-duration-long2) var(--md-motion-emphasized);
+      background: linear-gradient(135deg, 
+        var(--md-surface) 0%, 
+        color-mix(in srgb, var(--md-primary) 8%, var(--md-surface)) 50%,
+        var(--md-surface) 100%);
+      animation: welcomeBgPulse 8s ease-in-out infinite;
     }
+    
+    @keyframes welcomeBgPulse {
+      0%, 100% { 
+        background-position: 0% 50%;
+        background-size: 200% 200%;
+      }
+      50% { 
+        background-position: 100% 50%;
+        background-size: 200% 200%;
+      }
+    }
+    
+    /* 动态网格背景 */
+    #welcome-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        radial-gradient(circle at 20% 80%, color-mix(in srgb, var(--md-primary) 15%, transparent) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--md-tertiary) 10%, transparent) 0%, transparent 50%);
+      animation: welcomeOrbs 12s ease-in-out infinite alternate;
+      pointer-events: none;
+    }
+    
+    @keyframes welcomeOrbs {
+      0% { opacity: 0.5; transform: scale(1) rotate(0deg); }
+      100% { opacity: 0.8; transform: scale(1.1) rotate(5deg); }
+    }
+    
     #welcome-screen.fade-out {
       opacity: 0;
       pointer-events: none;
@@ -718,9 +776,21 @@
     }
     .welcome-search-wrap input:focus {
       border-color: var(--md-primary);
-      border-width: 2px;
-      padding: 15px 47px 15px 19px;
-      background: var(--md-surface-container-high);
+      background: var(--md-surface);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary) 20%, transparent),
+                  0 0 20px color-mix(in srgb, var(--md-primary) 30%, transparent);
+      animation: searchGlow 2s ease-in-out infinite;
+    }
+    
+    @keyframes searchGlow {
+      0%, 100% { 
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--md-primary) 20%, transparent),
+                    0 0 20px color-mix(in srgb, var(--md-primary) 30%, transparent);
+      }
+      50% { 
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--md-primary) 25%, transparent),
+                    0 0 30px color-mix(in srgb, var(--md-primary) 40%, transparent);
+      }
     }
     .welcome-search-wrap .welcome-search-icon {
       position: absolute;
@@ -782,10 +852,33 @@
                   transform var(--md-motion-duration-short2) var(--md-motion-emphasized);
     }
     .welcome-city-tag:hover {
-      background: var(--md-surface-container-high);
+      background: var(--md-primary-container);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--md-primary) 30%, transparent);
     }
     .welcome-city-tag:active {
-      transform: scale(0.95);
+      transform: scale(0.95) translateY(0);
+    }
+    
+    /* 城市标签入场动画 */
+    .welcome-city-tag {
+      animation: cityTagEnter 0.4s ease-out backwards;
+    }
+    .welcome-city-tag:nth-child(1) { animation-delay: 0.1s; }
+    .welcome-city-tag:nth-child(2) { animation-delay: 0.15s; }
+    .welcome-city-tag:nth-child(3) { animation-delay: 0.2s; }
+    .welcome-city-tag:nth-child(4) { animation-delay: 0.25s; }
+    .welcome-city-tag:nth-child(5) { animation-delay: 0.3s; }
+    
+    @keyframes cityTagEnter {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     #welcome-screen .lang-switcher {
       position: absolute;
