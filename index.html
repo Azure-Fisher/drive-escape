@@ -350,10 +350,62 @@
       .legend .hatch { width: 16px; height: 8px; }
 
       .info-panel {
-        right: 8px;
-        bottom: 70px;
-        max-width: 140px;
-        padding: 10px 12px;
+        position: fixed;
+        right: 12px;
+        bottom: 80px;
+        z-index: 1000;
+        background: var(--md-surface-container-high);
+        border-radius: var(--md-shape-corner-large);
+        box-shadow: var(--md-elevation-3);
+        padding: 16px 20px;
+        min-width: 180px;
+        max-width: 240px;
+        display: none;
+        border: 1px solid var(--md-outline-variant);
+        animation: infoPanelIn 0.2s ease-out;
+      }
+      
+      @keyframes infoPanelIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      .info-panel h4 {
+        font: 600 16px/1.3 'Noto Serif SC', serif;
+        color: var(--md-on-surface);
+        margin: 0 0 8px 0;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--md-outline-variant);
+      }
+      
+      .info-panel .info-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 6px 0;
+        font: var(--md-typescale-body-medium);
+        color: var(--md-on-surface-variant);
+      }
+      
+      .info-panel .info-row .icon {
+        font-size: 16px;
+      }
+      
+      .info-panel .info-row .value {
+        color: var(--md-on-surface);
+        font-weight: 500;
+      }
+      
+      .info-panel .origin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--md-primary-container);
+        color: var(--md-on-primary-container);
+        padding: 4px 10px;
+        border-radius: var(--md-shape-corner-small);
+        font: var(--md-typescale-label-small);
+        margin-top: 8px;
       }
 
       .loading-overlay { bottom: 16px; }
@@ -1368,23 +1420,50 @@ const infoName = document.getElementById("info-name");
 const infoDetail = document.getElementById("info-detail");
 
 function showInfo(dd) {
-
-  if (!dd) { infoPanel.style.display = "none"; return; }
-
+  if (!dd) return;
   const isOrigin = dd.isOrigin || dd.time === 0;
-
   const modeIcon = TRANSPORT_CONFIG[currentTransportMode]?.icon || '🚗';
-
-  infoName.textContent = isOrigin ? `${modeIcon} ${dd.name}（${t('origin')}）` : dd.name;
-
-  infoDetail.innerHTML = isOrigin
-
-    ? `<span class="time">${t('originLabel')}</span>`
-
-    : `<span class="time">🕐 ${fmtTime(dd.time)} ${t('timeUnit')}</span> · ${dd.dist} km${dd.estimated ? ' ' + t('estimated') : ''}`;
-
+  
+  // 标题
+  infoName.textContent = isOrigin ? dd.name : dd.name;
+  
+  // 详情内容
+  if (isOrigin) {
+    infoDetail.innerHTML = `
+      <div class="origin-badge">
+        <span>📍</span>
+        <span>${t('origin')}</span>
+      </div>
+    `;
+  } else {
+    const hours = Math.floor(dd.time);
+    const mins = Math.round((dd.time - hours) * 60);
+    const arrivalTime = new Date();
+    arrivalTime.setHours(arrivalTime.getHours() + hours);
+    arrivalTime.setMinutes(arrivalTime.getMinutes() + mins);
+    const arrivalStr = arrivalTime.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+    
+    infoDetail.innerHTML = `
+      <div class="info-row">
+        <span class="icon">🕐</span>
+        <span>耗时</span>
+        <span class="value">${fmtTime(dd.time)} ${t('timeUnit')}</span>
+      </div>
+      <div class="info-row">
+        <span class="icon">📏</span>
+        <span>距离</span>
+        <span class="value">${dd.dist} km</span>
+      </div>
+      <div class="info-row">
+        <span class="icon">🕐</span>
+        <span>到达</span>
+        <span class="value">约 ${arrivalStr}</span>
+      </div>
+      ${dd.estimated ? '<div class="info-row" style="color: var(--md-tertiary);"><span class="icon">📊</span><span>估算值</span></div>' : ''}
+    `;
+  }
+  
   infoPanel.style.display = "block";
-
 }
 
 // ── 标签 ──
