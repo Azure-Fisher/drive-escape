@@ -256,333 +256,58 @@
        ═══════════════════════════════════════════════════════════ */
     .transport-mode {
       position: fixed;
-      top: 12px;
-      left: 16px;
-      z-index: 1001;
-    }
-    .transport-mode select {
-      padding: 12px 40px 12px 16px;
-      border: 1px solid var(--md-outline);
-      border-radius: var(--md-shape-corner-small);
-      background: var(--md-surface-container);
-      font: var(--md-typescale-body-large);
-      color: var(--md-on-surface);
-      outline: none;
-      cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath fill='%236F7975' d='M12 16l-6-6h12z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      min-width: 140px;
-      transition: border-color var(--md-motion-duration-short4) var(--md-motion-standard),
-                  background var(--md-motion-duration-short4) var(--md-motion-standard);
-    }
-    .transport-mode select:hover {
-      background: var(--md-surface-container-high);
-    }
-    .transport-mode select:focus {
-      border-color: var(--md-primary);
-      border-width: 2px;
-      padding: 11px 39px 11px 15px;
-    }
-    .transport-mode select option {
-      background: var(--md-surface-container);
-      color: var(--md-on-surface);
-      padding: 12px;
-    }
-    .transport-mode select option:disabled {
-      color: var(--md-on-surface-variant);
-    }
-
-
-
-    /* ═══════════════════════════════════════════════════════════
-       Round Trip Indicator - MD3 Chip
-       ═══════════════════════════════════════════════════════════ */
-    .round-trip-indicator {
-      position: fixed;
-      top: 54px;
-      left: 16px;
-      z-index: 1001;
-      background: var(--md-primary-container);
-      color: var(--md-on-primary-container);
-      padding: 8px 16px;
-      border-radius: var(--md-shape-corner-small);
-      font: var(--md-typescale-label-large);
-      display: none;
-      box-shadow: var(--md-elevation-1);
-      animation: fadeSlideIn var(--md-motion-duration-medium1) var(--md-motion-emphasized);
-    }
-    .round-trip-indicator.active {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-
-
-    /* ═══════════════════════════════════════════════════════════
-       Language Switcher - MD3 Outlined Select
-       ═══════════════════════════════════════════════════════════ */
-    .lang-switcher select {
-      padding: 8px 32px 8px 12px;
-      border: 1px solid var(--md-outline);
-      border-radius: var(--md-shape-corner-extra-small);
-      background: var(--md-surface-container);
-      font: var(--md-typescale-label-large);
-      color: var(--md-on-surface);
-      outline: none;
-      cursor: pointer;
-      -webkit-appearance: none;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24'%3E%3Cpath fill='%236F7975' d='M12 16l-6-6h12z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-      transition: border-color var(--md-motion-duration-short4) var(--md-motion-standard);
-    }
-    .lang-switcher select:hover {
-      background: var(--md-surface-container-high);
-    }
-    .lang-switcher select:focus {
-      border-color: var(--md-primary);
-      border-width: 2px;
-      padding: 7px 31px 7px 11px;
-    }
-    #search-results {
-      margin-top: 4px;
-      background: var(--md-surface-container);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--md-shape-corner-medium);
-      box-shadow: var(--md-elevation-2);
-      border: 1px solid var(--md-outline-variant);
-      overflow: hidden;
-      display: none;
-      animation: fadeSlideIn var(--md-motion-duration-short4) var(--md-motion-standard);
-    }
-    #search-results .result-item {
-      padding: 12px 16px;
-      font: var(--md-typescale-body-medium);
-      color: var(--md-on-surface);
-      cursor: pointer;
-      border-bottom: 1px solid var(--md-outline-variant);
-      transition: background var(--md-motion-duration-short2) var(--md-motion-standard);
-    }
-    #search-results .result-item:last-child { border-bottom: none; }
-    #search-results .result-item:hover { 
-      background: var(--md-surface-container-high);
-    }
-    #search-results .result-item:active {
-      background: var(--md-primary-container);
-    }
-    #search-results .result-item .result-sub {
-      font: var(--md-typescale-body-small);
-      color: var(--md-on-surface-variant);
-      margin-top: 4px;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       Loading Indicator - MD3 Progress Indicator
-       ═══════════════════════════════════════════════════════════ */
-    .loading-overlay {
-      position: fixed;
       bottom: 24px;
       left: 50%;
       transform: translateX(-50%);
-      z-index: 2000;
-      display: none;
-      pointer-events: none;
-    }
-    .loading-overlay.active { display: flex; }
-    .loading-box {
+      z-index: 1000;
+      display: flex;
+      gap: 4px;
       background: var(--md-surface-container);
+      padding: 6px;
       border-radius: var(--md-shape-corner-extra-large);
-      box-shadow: var(--md-elevation-3);
-      border: 1px solid var(--md-outline-variant);
-      padding: 12px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font: var(--md-typescale-label-large);
-      color: var(--md-on-surface);
-      white-space: nowrap;
-    }
-    .loading-box .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid var(--md-surface-container-highest);
-      border-top-color: var(--md-primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      flex-shrink: 0;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } } }
-
-    /* ═══════════════════════════════════════════════════════════
-       Legend - MD3 Card
-       ═══════════════════════════════════════════════════════════ */
-    .leaflet-control-zoom { display: none !important; }
-    .legend {
-      position: fixed;
-      left: 12px;
-      bottom: 24px;
-      z-index: 1000;
-      width: 160px;
-      padding: 16px;
-      background: var(--md-surface-container);
-      border-radius: var(--md-shape-corner-medium);
-      box-shadow: var(--md-elevation-1);
-      border: 1px solid var(--md-outline-variant);
-    }
-    .legend h3 { 
-      font: var(--md-typescale-title-small);
-      color: var(--md-on-surface);
-      margin-bottom: 12px;
-      letter-spacing: 0.02em;
-    }
-    .legend .item, .legend .band {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 8px 0;
-      font: var(--md-typescale-body-small);
-      color: var(--md-on-surface-variant);
-    }
-    .legend .swatch {
-      width: 24px;
-      height: 12px;
-      border-radius: 2px;
-      border: 1px solid var(--md-outline-variant);
-      flex-shrink: 0;
-    }
-    .legend .line-swatch {
-      width: 24px;
-      height: 0;
-      flex-shrink: 0;
-    }
-    .legend .line-swatch.city { border-top: 2px solid var(--md-tertiary); }
-    .legend .line-swatch.prov { border-top: 2px dashed var(--md-outline); }
-    .legend .line-swatch.origin { border-top: 3px solid var(--md-error); }
-    .legend .hatch {
-      width: 24px;
-      height: 12px;
-      flex-shrink: 0;
-      border-radius: 2px;
-      border: 1px solid var(--md-outline-variant);
-      background: repeating-linear-gradient(45deg, var(--md-error), var(--md-error) 3px, var(--md-surface) 3px, var(--md-surface) 6px);
-    }
-
-    /* 县区标签 */
-    .county-label {
-      font-weight: 600;
-      line-height: 1.2;
-      color: #111;
-      text-align: center;
-      white-space: pre;
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.9),
-        1px -1px 0 rgba(255,255,255,0.9),
-        -1px 1px 0 rgba(255,255,255,0.9),
-        1px 1px 0 rgba(255,255,255,0.9),
-        0 0 4px rgba(255,255,255,0.8);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-    }
-    .county-label.gray {
-      color: #888;
-      font-weight: 400;
-      text-shadow:
-        -1px -1px 0 rgba(255,255,255,0.7),
-        1px -1px 0 rgba(255,255,255,0.7),
-        -1px 1px 0 rgba(255,255,255,0.7),
-        1px 1px 0 rgba(255,255,255,0.7);
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       Info Panel - MD3 Card
-       ═══════════════════════════════════════════════════════════ */
-    .info-panel {
-      position: fixed;
-      right: 12px;
-      bottom: 24px;
-      z-index: 1000;
-      padding: 16px 20px;
-      background: var(--md-surface-container);
-      border-radius: var(--md-shape-corner-medium);
       box-shadow: var(--md-elevation-2);
       border: 1px solid var(--md-outline-variant);
-      font: var(--md-typescale-body-medium);
-      color: var(--md-on-surface);
-      display: none;
-      max-width: 240px;
-      animation: fadeSlideIn var(--md-motion-duration-medium2) var(--md-motion-emphasized);
     }
-    @keyframes fadeSlideIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+    
+    .transport-tab {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border: none;
+      border-radius: var(--md-shape-corner-large);
+      background: transparent;
+      color: var(--md-on-surface-variant);
+      font: var(--md-typescale-label-large);
+      cursor: pointer;
+      transition: all var(--md-motion-duration-short3) var(--md-motion-standard);
+      white-space: nowrap;
     }
-    .info-panel h4 { 
-      font: var(--md-typescale-title-small);
-      color: var(--md-on-surface);
-      margin-bottom: 8px;
+    
+    .transport-tab:hover {
+      background: var(--md-surface-container-high);
     }
-    .info-panel .time { 
-      color: var(--md-primary);
-      font-weight: 500;
+    
+    .transport-tab.active {
+      background: var(--md-secondary-container);
+      color: var(--md-on-secondary-container);
     }
-
-    /* 隐藏 leaflet 默认控件样式 */
-    .leaflet-control-attribution { font-size: 9px !important; }
-    /* 移动端适配 — 保持 PC 版风格，只缩小 */
-    @media (max-width: 640px) {
-      /* ═══════════════════════════════════════════════════════════
-         Mobile Layout - Compact Window Size Class
-         ═══════════════════════════════════════════════════════════ */
-      .title-overlay {
-        top: 8px;
-        padding: 8px 16px;
-        max-width: calc(100vw - 100px);
-      }
-      .title-overlay .en { font-size: 9px; }
-      .title-overlay h1 { font-size: 16px; }
-      .title-overlay .sub { font-size: 11px; }
-
-      .top-controls {
-        top: auto;
-        right: auto;
-        left: auto;
-        display: contents;
-      }
-      .top-controls .lang-switcher {
-        position: fixed;
-        top: 12px;
-        right: 10px;
-        z-index: 1002;
-      }
-      .lang-switcher select {
-        padding: 6px 28px 6px 10px;
-        font-size: 12px;
-      }
-
-      /* 出行方式选择器 - 左侧 */
-      .transport-mode {
-        position: fixed;
-        top: 90px;
-        left: 8px;
-        z-index: 1001;
-      }
-      .transport-mode select {
-        padding: 10px 32px 10px 12px;
-        font-size: 12px;
-        min-width: 90px;
-      }
-      .round-trip-indicator {
-        top: 126px;
-        left: 8px;
-        font-size: 11px;
-        padding: 6px 12px;
-      }
+    
+    .transport-tab.active:hover {
+      background: var(--md-surface-container-highest);
+    }
+    
+    .transport-tab .icon {
+      font-size: 18px;
+    }
+    
+    .transport-tab.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    
+    
 
       /* 搜索框 - 右侧 */
       .top-controls .search-box {
@@ -974,51 +699,38 @@
 
 <!-- 出行方式选择器 -->
 
-<div class="transport-mode">
-
-  <select id="transport-select">
-
-    <option value="car">🚗 自驾 (5小时)</option>
-
-    <option value="motorcycle">🏍️ 摩托车 (4小时)</option>
-
-    <option value="highspeed">🚄 高铁 (5小时)</option>
-
-    <option value="metro" id="metro-option" disabled>🚇 地铁 (3小时)</option>
-
-    <option value="bicycle">🚲 自行车 (4小时)</option>
-
-    <option value="roundtrip">🔄 往返 (自驾8小时)</option>
-
-  </select>
-
-</div>
-
-<div class="round-trip-indicator" id="round-trip-indicator">往返模式：单程4小时</div>
-
-
-
-<div class="title-overlay" id="title-overlay-card">
-  <div class="title-text">
-    <div class="en">Weekend Travel Map</div>
-    <h1>周末出行地图</h1>
-    <div class="sub" id="title-sub">...</div>
-  </div>
-</div>
-
-<div class="top-controls">
-  <div class="search-box">
-    <input type="text" id="city-search" placeholder="搜索出发城市..." />
-    <div id="search-results"></div>
-  </div>
-  <div class="lang-switcher">
-    <select id="lang-select">
-      <option value="zh-CN">简体中文</option>
-      <option value="zh-TW">繁體中文</option>
-      <option value="en">English</option>
-      <option value="ja">日本語</option>
-    </select>
-  </div>
+<div class="transport-mode" id="transport-tabs">
+    <button class="transport-tab active" data-mode="car">
+      <span class="icon">🚗</span>
+      <span class="label">自驾</span>
+      <span class="time">5h</span>
+    </button>
+    <button class="transport-tab" data-mode="motorcycle">
+      <span class="icon">🏍️</span>
+      <span class="label">摩托</span>
+      <span class="time">4h</span>
+    </button>
+    <button class="transport-tab" data-mode="highspeed">
+      <span class="icon">🚄</span>
+      <span class="label">高铁</span>
+      <span class="time">5h</span>
+    </button>
+    <button class="transport-tab" data-mode="metro" id="metro-tab">
+      <span class="icon">🚇</span>
+      <span class="label">地铁</span>
+      <span class="time">3h</span>
+    </button>
+    <button class="transport-tab" data-mode="bicycle">
+      <span class="icon">🚲</span>
+      <span class="label">骑行</span>
+      <span class="time">4h</span>
+    </button>
+    <button class="transport-tab" data-mode="roundtrip">
+      <span class="icon">🔄</span>
+      <span class="label">往返</span>
+      <span class="time">8h</span>
+    </button>
+  </div>>
 </div>
 
 <div class="loading-overlay" id="loading">
@@ -1594,7 +1306,8 @@ function updateMetroOption(cityName) {
 
       currentTransportMode = 'car';
 
-      document.getElementById('transport-select').value = 'car';
+      document.querySelectorAll('.transport-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('.transport-tab[data-mode="car"]').classList.add('active');
 
     }
 
@@ -2715,58 +2428,37 @@ async function welcomeSelectCity(name) {
 
 // ── 出行方式切换 ──
 
-document.getElementById('transport-select').addEventListener('change', async (e) => {
-
-  const newMode = e.target.value;
-
-
-
+// 出行方式 Tab 切换
+document.getElementById('transport-tabs').addEventListener('click', async (e) => {
+  const tab = e.target.closest('.transport-tab');
+  if (!tab || tab.classList.contains('disabled')) return;
+  
+  const newMode = tab.dataset.mode;
+  
   // 如果切换到地铁但当前城市没有地铁，阻止切换
-
   if (newMode === 'metro' && !hasMetro(currentCityName)) {
-
-    e.target.value = currentTransportMode;
-
     return;
-
   }
-
-
-
+  
+  // 更新 Tab 状态
+  document.querySelectorAll('.transport-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  
   currentTransportMode = newMode;
-
-
-
+  
   // 更新往返模式指示器
-
   const roundTripIndicator = document.getElementById('round-trip-indicator');
-
   if (newMode === 'roundtrip') {
-
     roundTripIndicator.classList.add('active');
-
   } else {
-
     roundTripIndicator.classList.remove('active');
-
   }
-
-
-
+  
   // 重新计算并渲染
-
   if (currentCityName) {
-
     showLoading(t('loading'));
-
-    // 清除旧的驾车数据缓存
-
     driveDataMap = {};
-
-    // 重新渲染地图
-
-    renderMap(true);
-
+    renderMap();
     hideLoading();
 
   }
